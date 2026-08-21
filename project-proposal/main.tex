@@ -1,242 +1,361 @@
 \documentclass[11pt,a4paper]{article}
+
+% ---------- Packages ----------
 \usepackage[margin=1in]{geometry}
-\usepackage{hyperref}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{titlesec}
 \usepackage{enumitem}
-\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
 \usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{parskip}
+\usepackage{graphicx}
 
-% -----------------------------------------------------
-% bvraghav-tiet-ucs503p-article.sty
-% -----------------------------------------------------
+% ---------- Colors ----------
+\definecolor{headingblue}{RGB}{22,54,92}
+\definecolor{accentgold}{RGB}{196,154,58}
+\definecolor{subtletext}{RGB}{90,98,110}
 
-% Variable: Lab Instructor
-\makeatletter \newcommand{\BvrSetLabInstructor}[1]{%
-  \gdef\Bvr@LabInstructor{#1}}
-% default
-\newcommand{\Bvr@LabInstructor}{Dr. Raghav %
-  B. Venkataramaiyer}
-% public accessor
-\newcommand{\BvrLabInstructorValue}{\Bvr@LabInstructor}
-\makeatother
+% ---------- Section formatting ----------
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{headingblue}}
+  {\thesection}{0.6em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{headingblue}}
+  {\thesubsection}{0.6em}{}
 
-% Add subtitle
-\usepackage{titling}
-% -- Set title bold
-\pretitle{\begin{center}\bfseries\fontsize{18bp}{18bp}\selectfont}
-\makeatletter
-\newcommand{\BvrSubtitle}[1]{%
-  \posttitle{%
-    \par\end{center}
-    \begin{center}\large#1\end{center}
-    \vskip 0.5em}%
-}
-\makeatother
+\titlespacing*{\section}{0pt}{1.4em}{0.8em}
+\titlespacing*{\subsection}{0pt}{1em}{0.5em}
 
-% Hints in the section title(s)
-\newcommand{\BvrHint}[1]{%
-  {\normalfont\normalsize\itshape\hfill #1}}
+% ---------- Header/Footer ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{\small Festify -- Project Proposal}
 
-% -----------------------------------------------------
-
-\title{Grievance-Resolution System for a Tier-2/3 City}
-
-\BvrSetLabInstructor{Dr. Raghav B. Venkataramaiyer}
-
-\BvrSubtitle{%
-  Project Proposal for UCS503P  \\
-  Submitted to: \BvrLabInstructorValue \\ \bfseries
-  Thapar Institute of Engineering and Technology% 
+% ---------- Hyperref ----------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=headingblue,
+    urlcolor=headingblue,
+    citecolor=headingblue,
+    pdftitle={Festify Project Proposal},
+    pdfauthor={Festify Team}
 }
 
-\author{
-  Vidya Vaidyanathan, CSED%
-  \thanks{Roll No: \texttt{1024030xxx}, %
-    Email: \texttt{vvaidhanathan\_be24\@thapar.edu}}
-  \and 
-  Bhanurekha Ganesan, CSED%
-  \thanks{Roll No: \texttt{1024030xxx}, %
-    Email: \texttt{bganesan\_be24\@thapar.edu}}
-}
-
-\date{\today}
+\setlist[itemize]{leftmargin=1.4em, itemsep=0.2em, topsep=0.3em}
+\setlist[enumerate]{leftmargin=1.6em, itemsep=0.2em, topsep=0.3em}
 
 \begin{document}
-\maketitle
 
-\section{Higher-order goal%
-  \BvrHint{\ldots secondary framing}}
-This project aims to improve sustainable urban
-governance by reducing the time and effort required to
-resolve citizen issues. While the topic is broader than
-any single municipality, the immediate engineering
-objective is to translate \emph{efficient public
-  service delivery} into a measurable, deployable
-software solution.
+% =========================================================
+% TITLE PAGE
+% =========================================================
+\begin{titlepage}
+    \centering
 
-\section{Time-to-value %
-\BvrHint{\ldots primary heuristic}}
-\begin{itemize}[leftmargin=0.7cm]
-    \item We will deliver meaningful increments quickly by prototyping the core user workflow and validating it with users within a short iteration window.
-    \item We will prioritize fast feedback over perfection by using weekly iterations (and targeting CI-backed automation early) to reduce release friction.
-    \item Success is defined by what can be delivered and measured in the first iteration, then improved based on user feedback.
+    \vspace*{2.15cm}
+
+    {\small
+    \bfseries
+    \color{subtletext}
+    \MakeUppercase{Software Engineering(UCS503)}
+    \par}
+
+    \vspace{0.25em}
+
+    {\small
+    \color{subtletext}
+    Project Proposal
+    \par}
+
+    \vspace{2.15cm}
+
+    {\fontsize{52}{58}
+    \selectfont
+    \bfseries
+    \color{headingblue}
+    Festify
+    \par}
+
+    \vspace{0.55em}
+
+    {\color{accentgold}
+    \rule{4.5cm}{1.4pt}
+    \par}
+
+    \vspace{0.85em}
+
+    {\Large
+    \color{subtletext}
+    A Reusable Multi-Tenant Platform for\\[0.15em]
+    College Fest Management
+    \par}
+
+    \vspace{3.25cm}
+
+    {\large
+    \bfseries
+    \color{headingblue}
+    Course Instructor:
+    }
+    {\large
+    Mr.\ Hardik Gujral
+    \par}
+
+    \vspace{0.75cm}
+
+    {\small
+    \bfseries
+    \color{headingblue}
+    \MakeUppercase{Team Members}
+    \par}
+
+    \vspace{0.75em}
+
+    {\large
+    Manvi Gajrani\ {\small(\texttt{1024170367})}\\[0.45em]
+    Diya Garg\ {\small(\texttt{1024170370})}\\[0.45em]
+    Manishika Rana\ {\small(\texttt{1024170426})}
+    \par}
+
+    \vfill
+
+    \includegraphics[width=3 cm]{thapar logo.jpg}
+    \par
+
+    \vspace{0.35em}
+
+    {\large
+    Thapar Institute of Engineering and Technology
+    \par}
+
+    \vspace*{1.55cm}
+
+\end{titlepage}
+
+% =========================================================
+% ABSTRACT
+% =========================================================
+\section*{Abstract}
+Fest committees at colleges rebuild registration forms, schedules, and communication
+channels from scratch every year, relying on Google Forms, WhatsApp groups, static PDFs,
+and manual reconciliation. \textbf{Festify} addresses this gap by delivering a reusable,
+multitenant web platform: instead of building a new website, a college creates a fest
+inside Festify, configures branding and events, and publishes it to students. The
+project will design, build, and deploy a functional prototype within the semester,
+centering on registration, secure QR-based check-in, a live schedule, an interactive
+venue map, and an organizer dashboard -- with an optional, privacy-first crowd-density
+layer built on top of, not required by, the core platform.
+
+% =========================================================
+% 1. INTRODUCTION & PROBLEM STATEMENT
+% =========================================================
+\section{Introduction \& Problem Statement}
+
+Large, well-resourced events increasingly rely on dedicated event-management software,
+yet most college fests are still coordinated through a patchwork of disconnected,
+general-purpose tools. A typical fest committee opens a fresh Google Form for every
+event, circulates a schedule as a static PDF that goes stale the moment a timing
+changes, and answers "where is this happening?" through word of mouth. This is not a
+failure of effort on the organizers' part -- it is a symptom of there being no
+purpose-built, reusable system for a problem that recurs, almost identically, every
+single year.
+
+The resulting gap is felt on both sides of the fest. Students face a separate
+registration form per event whose data never converges into one profile, schedules that
+are outdated as soon as they are printed, difficulty navigating large or unfamiliar
+venues, and entry passes scattered across email threads and screenshots that are easy to
+lose or duplicate. Organizers, meanwhile, have no central registration view and must
+reconcile headcounts by hand across dozens of spreadsheets; announcements are split
+across WhatsApp groups, Instagram stories, and PA calls that frequently disagree with
+one another; and crowd build-up at a stage or food court is only discovered once a
+volunteer physically calls it in, rather than through live data. Because nothing from
+one year's effort is designed to be reused, every committee starts over with new forms,
+a new site (if any), and the same chaos the following year.
+
+Festify proposes to close this gap with a single, reusable, multi-tenant web
+application. Rather than shipping a fresh codebase per college, one deployment serves
+every tenant: a college's data is fully isolated at the database and real-time layers,
+but the underlying registration, scheduling, mapping, and dashboard logic is shared and
+configured, not rebuilt. By treating fest management as a configuration problem instead
+of a development problem, Festify turns a recurring annual cost into a one-time
+engineering investment.
+
+% =========================================================
+% 2. OBJECTIVES
+% =========================================================
+\section{Objectives}
+
+\textbf{Primary goal.} To design, develop, and deploy a functional, multi-tenant fest
+management web platform -- covering registration, secure QR check-in, live scheduling,
+and an organizer dashboard -- within the semester.
+
+\textbf{Specific objectives:}
+\begin{itemize}
+    \item Implement a multi-tenant data model in which every table traces back to a
+    \texttt{tenant\_id}, and every API request is authenticated and automatically
+    scoped, so one college's organizers can never see or query another college's data.
+    \item Build a student-facing registration flow with server-side, per-event capacity
+    checks and a cryptographically signed QR pass issued on successful registration.
+    \item Develop a live schedule and interactive venue map (zones, stages, stalls, and
+    gates) backed by a PostgreSQL~+~PostGIS spatial data layer.
+    \item Build an organizer dashboard exposing registration counts, event statistics,
+    and real-time check-in numbers, updated via a Socket.IO real-time layer.
+    \item Achieve a measurable performance target: a median \emph{Time-to-Check-In}
+    (QR scan at the gate to dashboard update) of $\leq 2$ seconds during pilot testing.
+    \item Design an optional, privacy-first crowd-density module that reports only
+    aggregate, anonymized zone occupancy and can be disabled without affecting
+    registration, passes, or schedules.
 \end{itemize}
 
-\section{Problem Statement}
-Citizens in a tier-2/3 Indian city face delays and uncertainty when reporting local issues (e.g., streetlight outages, water leakage, garbage accumulation, road potholes). Common pain points include:
-\begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Fragmentation:} complaints are often made via multiple channels (calls, social media, paper forms), causing lost context.
-    \item \textbf{Low transparency:} citizens cannot easily see the status of their complaint (e.g., ``received'', ``assigned'', ``in progress'', ``resolved'').
-    \item \textbf{Slow coordination:} departments/field teams lack a unified, trackable workflow with clear ownership.
-    \item \textbf{Poor data quality:} duplicate or incomplete reports force rework and extend resolution time.
+% =========================================================
+% 3. METHODOLOGY (SYSTEM ARCHITECTURE)
+% =========================================================
+\section{Methodology (System Architecture)}
+
+This is an engineering course project, so the methodology emphasizes reusable,
+multi-tenant architecture and workflow correctness over algorithmic novelty. The system
+is built as a \emph{layered architecture}: each layer talks only to the layer
+immediately above or below it, so any single layer can be swapped out later without
+rewriting the rest of the system.
+
+\subsection{Tech Stack}
+The frontend is a \textbf{React~+~TypeScript Progressive Web App (PWA)} -- installable
+to a home screen and capable of offline caching (via a Service Worker) for the
+schedule, map, and QR pass, so the app remains usable even with unreliable venue
+connectivity. The backend is a \textbf{Node.js~+~Express REST API}, exchanging JSON
+over HTTPS. The primary data store is \textbf{PostgreSQL with the PostGIS extension},
+chosen because fest data (tenants, events, registrations, venue zones) is highly
+relational and PostGIS provides native spatial queries such as point-in-polygon.
+ \textbf{Socket.IO} (built on WebSockets)
+provides the real-time layer, using per-fest ``rooms'' so a broadcast to one college's
+students never reaches another's. The system is containerized with \textbf{Docker} and
+deployed through a \textbf{CI/CD} pipeline (test $\rightarrow$ build image
+$\rightarrow$ deploy to staging), with a \textbf{CDN} serving static assets and map
+tiles.
+
+\subsection{Module Development}
+The system decomposes into an authentication core plus functional modules built around
+the database schema (Tenant, Fest, Event, User, Registration, Notification, Zone,
+CrowdSnapshot). The \textbf{Auth \& RBAC module} issues signed JSON Web Tokens (JWT)
+encoding the user's role (student / organizer / admin) and enforces which resources
+each role may read or write, without the server needing to remember a session in
+memory. The \textbf{Fest \& Event module} handles tenant-scoped creation and
+configuration of fests, events, and venue zones -- with the \texttt{Zone} table using
+single-table inheritance (a \texttt{type} discriminator distinguishing capacity-tracked
+polygon zones from point landmarks like gates and washrooms) so one table cleanly
+serves both the crowd module and the venue map. The \textbf{Registration \& Passes
+module} performs server-side capacity checks and issues a signed QR token
+(\texttt{payload~+~signature}, verifiable offline without a database round-trip). The
+\textbf{Organizer Dashboard module} aggregates registration counts, event statistics,
+and live check-in numbers. The optional \textbf{Crowd module} resolves opted-in student
+locations to a venue zone via PostGIS point-in-polygon queries, then aggregates and
+immediately discards individual pings -- \texttt{CrowdSnapshot} has no user-identifying
+column at all, so the privacy guarantee is structural, not merely policy.
+
+\subsection{Execution \& Integration}
+The end-to-end workflow is: (1) a fest committee creates a fest and configures
+branding, events, and venue zones; (2) a student joins the fest, browses events, and
+registers, with capacity validated server-side; (3) the system issues a signed QR pass,
+cached offline on the student's device; (4) volunteers scan the QR pass at the gate,
+and check-in status propagates to the organizer dashboard in real time via Socket.IO.
+All modules consume the same API and database, with the RBAC layer guaranteeing data
+isolation between roles and the tenant layer guaranteeing isolation between colleges.
+
+\subsection{Testing \& Validation}
+Unit tests cover individual API endpoints and frontend components; integration tests
+verify cross-module data flow (e.g., a newly created event correctly appears in the
+student schedule and map); and scoped-query tests specifically target tenant isolation,
+asserting that no query can return another tenant's rows. A \textbf{User Acceptance
+Test} with a small pilot fest (25-50 student registrants, 5-10
+volunteers/organizers) validates real-world usability, and performance is benchmarked
+for Time-to-Check-In and concurrent dashboard load.
+
+\subsection{Constraints \& Security}
+Because the system handles registration and location data, security and privacy are
+first-class concerns: passwords and tokens are never stored in plaintext, all traffic
+is served over HTTPS, and every endpoint is role-gated through RBAC. Location
+collection for the crowd module is strictly opt-in, gated behind explicit browser
+permission, and only aggregate zone counts are ever persisted. To manage scope, the
+semester deliverable is treated as a minimum viable product; the crowd-density module
+is explicitly optional and designed to degrade gracefully (fail or be disabled without
+breaking registration, passes, or schedules).
+
+% =========================================================
+% 4. TIMELINE
+% =========================================================
+\section{Timeline}
+
+The schedule spans a 15-week semester with overlapping phases and an explicit buffer
+week for unforeseen delays.
+
+\begin{longtable}{@{}p{1.6cm}p{6.7cm}p{6.2cm}@{}}
+\toprule
+\textbf{Week} & \textbf{Task / Phase} & \textbf{Deliverable} \\
+\midrule
+\endhead
+1--2 & Requirements gathering, ER diagram, database schema design, environment setup & SRS document + ER diagram \\
+3--4 & Multi-tenant data model, Auth \& RBAC (JWT) & Working tenant-scoped login \\
+5--7 & Registration module + signed QR pass generation & Registration \& passes module \\
+8--9 & Live schedule + interactive venue map (PostGIS) & Schedule \& map module \\
+10--11 & Organizer dashboard + Socket.IO real-time layer & Real-time dashboard \\
+12 & Optional crowd-density module (opt-in, aggregate-only) & Crowd module (prototype) \\
+13 & Unit, integration \& tenant-isolation testing & Test report \\
+14 & Buffer week -- bug fixing \& contingency & Stabilized build \\
+15 & Deployment (Docker + CI/CD), documentation, final report \& demo & Deployed app + report + presentation \\
+\bottomrule
+\end{longtable}
+
+% =========================================================
+% 5. RESOURCES & BUDGET
+% =========================================================
+\section{Resources \& Budget}
+
+\textbf{Human resources.} A three-member team with divided responsibilities across
+frontend (React PWA, student- and organizer-facing UI), backend (REST API, database
+schema, and multi-tenant isolation), and real-time infrastructure, testing \& deployment
+(Socket.IO, Redis, Docker, CI/CD). Responsibilities overlap during the integration and
+testing phases.
+
+
+\textbf{Material resources.} Personal laptops; open-source frameworks (React,
+Node.js/Express, PostgreSQL, PostGIS, Redis, Socket.IO); GitHub for version control;
+and free-tier cloud services for hosting and managed PostgreSQL.
+
+\textbf{Budget.} No external funding is required; all core resources are free,
+open-source, or covered by university access. Optional costs -- a custom domain or
+additional cloud capacity for the pilot -- are minimal and not required for the graded
+prototype.
+
+% =========================================================
+% 6. RISK MANAGEMENT
+% =========================================================
+\section{Risk Management}
+
+\begin{itemize}
+    \item \textbf{Data privacy / consent:} Gate all location collection behind explicit
+    browser permission; store aggregate zone counts only, never individual location
+    history.
+    \item \textbf{Tenant data leakage:} Enforce \texttt{tenant\_id} scoping at every
+    query and cover it with automated tests before any feature ships.
+    \item \textbf{Organizer adoption:} Keep the dashboard workflow minimal (create
+    fest, add events, monitor, announce) and pilot with one small event before a full
+    fest.
+    \item \textbf{Offline reliability at the gate:} Rely on service-worker caching for
+    QR passes and schedules so check-in does not depend on venue connectivity.
+    \item \textbf{Scope creep:} Treat the crowd-density module as an optional add-on
+    that can be deferred or disabled without affecting the core registration,
+    scheduling, and check-in workflow.
+    \item \textbf{Operational issues in pilot:} Use staging early and ensure the
+    CI/CD pipeline produces repeatable deployments before the pilot event.
 \end{itemize}
 
-\textbf{Why this matters now (contextual relevance):} In an urban setting with limited staff bandwidth, even small process improvements can noticeably reduce resolution delays and repeated submissions.
 
-\section{Proposed Solution %
-\BvrHint{\ldots Software Proposition}}
-\subsection{Overview}
-Build a \textbf{web-based} ``Grievance-to-Resolution'' system with the following components:
-\begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Citizen submission portal:} users submit an issue with photo (optional), category, and locality/ward.
-    \item \textbf{Automated triage:} basic duplicate detection and completeness checks.
-    \item \textbf{Department workflow:} assign issues to relevant department/team and update statuses.
-    \item \textbf{Status transparency:} citizens track status and receive notifications when resolved.
-    \item \textbf{Admin/ops dashboard:} performance summaries (resolution time, backlog).
-\end{itemize}
-
-\subsection{Core workflow}
-\begin{enumerate}[leftmargin=0.7cm]
-    \item Citizen creates a complaint and receives a complaint ID immediately.
-    \item System validates completeness and suggests possible duplicates (lightweight similarity on text/category and approximate location).
-    \item Department staff update status (Received $\rightarrow$ Assigned $\rightarrow$ In Progress $\rightarrow$ Resolved).
-    \item Citizen views status updates and resolution notes.
-\end{enumerate}
-
-\subsection{Operational constraints for an educational, tier-2/3 setting}
-\begin{itemize}[leftmargin=0.7cm]
-    \item Keep the solution usable on low-to-mid range devices via responsive web design.
-    \item Avoid dependence on advanced research algorithms; focus on workflow, automation, and system correctness.
-    \item Design for deployability using common web hosting and managed databases.
-\end{itemize}
-
-\section{Solution Approach %
-\BvrHint{\ldots Engineering focus}}
-This is an engineering course project, so we focus on scalable administrative and workflow aspects rather than novel algorithm research.
-
-\subsection{Duplicate/quality assistance %
-\BvrHint{\ldots non-research}}
-Duplicate detection will be heuristic-based:
-\begin{itemize}[leftmargin=0.7cm]
-    \item Normalize text (category + short description keywords).
-    \item Use a simple similarity measure (e.g., token overlap / TF-IDF cosine with threshold) without claiming state-of-the-art.
-    \item Show top candidate duplicates to staff for decision; never fully auto-delete or auto-reject.
-\end{itemize}
-
-\subsection{Web architecture %
-\BvrHint{\ldots web-based solution}}
-A typical 3-tier web architecture:
-\begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Frontend:} responsive UI for citizens and staff (status pages, submission form, dashboard).
-    \item \textbf{Backend API:} authentication, complaint submission, status transitions, assignment logic.
-    \item \textbf{Database:} store users, complaints, status history, attachments metadata.
-\end{itemize}
-
-\subsection{CI/CD and fast delivery enabler}
-CI/CD will be used to:
-\begin{itemize}[leftmargin=0.7cm]
-    \item Automatically build and run tests on every change.
-    \item Produce repeatable deployment artifacts to staging.
-    \item Enable safe and frequent releases of incremental features.
-\end{itemize}
-
-\section{Evaluation Criterion %
-\BvrHint{\ldots measurable and attributable}}
-We define success using measurable metrics tied to the core workflow.
-
-\subsection{Primary evaluation metric}
-\textbf{Time-to-acknowledgement (TTA):} time between complaint submission and ``Received/Assigned'' status creation in the system.
-\begin{itemize}[leftmargin=0.7cm]
-    \item Target: median TTA $\le$ 2 hours during pilot window.
-    \item Attribution: measured from database timestamps (submission vs. first status update by staff).
-\end{itemize}
-
-\subsection{Secondary evaluation metrics}
-\begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Resolution time reduction:} reduce time-to-resolved compared to baseline process (even if baseline is collected via survey).
-    \item \textbf{Duplicate rate:} percentage of complaints flagged as duplicates and resolved without rework.
-    \item \textbf{User clarity:} citizen-reported clarity of status using a simple 1--5 feedback question.
-    \item \textbf{Reliability:} availability of staging/production for login and submission during business hours (e.g., $\ge$ 99\% uptime in pilot).
-\end{itemize}
-
-\subsection{Pilot validation plan %
-\BvrHint{\ldots high-level}}
-\begin{itemize}[leftmargin=0.7cm]
-    \item Recruit 10--20 pilot users (citizens) and 3--5 staff roles (department simulation if real staff unavailable).
-    \item Compare metrics before/after within the iteration window by logging baseline estimates via short interviews or existing process observations.
-\end{itemize}
-
-\section{Scalability %
-\BvrHint{\ldots with foresight}}
-The proposition should scale in both theoretical and practical senses.
-
-\begin{enumerate}[leftmargin=0.7cm]
-    \item \textbf{Scalable (theoretically):} The system should support growth in number of complaints and concurrent dashboard usage by:
-    \begin{itemize}[leftmargin=0.7cm]
-        \item decoupling components (frontend/backend),
-        \item enabling pagination and indexing for common queries,
-        \item using stateless API design.
-    \end{itemize}
-    
-    \item \textbf{Operationally deployable (practically):} The system should run on common web hosting:
-    \begin{itemize}[leftmargin=0.7cm]
-        \item managed database,
-        \item containerized or platform-hosted deployment,
-        \item CI/CD pipeline for staging/production.
-    \end{itemize}
-\end{enumerate}
-
-\section{Engine availability heuristic}
-A mature set of ``engines'' (tooling/services) is available to implement this as a web-based project:
-\begin{itemize}[leftmargin=0.7cm]
-    \item Web framework for REST APIs and templated/reactive pages.
-    \item Managed relational or document database.
-    \item Authentication approach (token-based or session-based).
-    \item Object storage for optional attachments (or local storage for pilot).
-    \item Test framework for unit/integration tests.
-    \item CI runner and staging deployment target.
-\end{itemize}
-We will use these mature components to focus on workflow design, correctness, and measurement rather than inventing new infrastructure.
-
-\section{Project scope and deliverables %
-\BvrHint{\ldots iteration-friendly}}
-\subsection{Initial deliverable %
-\BvrHint{\ldots first iteration}}
-\begin{itemize}[leftmargin=0.7cm]
-    \item Citizen submission form + complaint ID generation
-    \item Staff workflow: update status and assignment
-    \item Citizen status page: view timeline/history
-    \item Basic logging and timestamps for TTA measurement
-    \item CI: build + backend unit tests + linting
-    \item CD to staging with a single command or pipeline job
-\end{itemize}
-
-\subsection{Subsequent deliverables}
-\begin{itemize}[leftmargin=0.7cm]
-    \item Lightweight duplicate suggestions with staff review
-    \item Notification layer (email/SMS optional in later iteration; can start with in-app notifications)
-    \item Admin dashboard for metrics and backlog
-    \item Improved search/filtering and indexed queries for scale readiness
-\end{itemize}
-
-\section{Risks and mitigations}
-\begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Data privacy / consent:} minimize collected data; keep attachments optional; store only what is needed.
-    \item \textbf{Staff adoption:} provide an easy UI for status updates; keep workflow steps minimal; include shortcuts.
-    \item \textbf{Evaluation measurement ambiguity:} instrument timestamps and define clear status transitions before development begins.
-    \item \textbf{Operational issues in pilot:} use staging early; ensure CI/CD produces repeatable deployments.
-\end{itemize}
-
-\section{Summary}
-This project proposes a deployable web platform to reduce grievance handling delays in a tier-2/3 city context. It meets the course criteria by emphasizing time-to-value through rapid iterations, implementing CI/CD to support frequent safe releases, and using measurable evaluation criteria (especially time-to-acknowledgement). It remains focused on engineering workflow and scalability readiness rather than research-driven novelty.
 
 \end{document}
