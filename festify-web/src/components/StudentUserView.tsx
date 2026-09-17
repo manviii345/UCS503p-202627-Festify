@@ -78,7 +78,7 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
   };
 
   const fetchMyRegistrations = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('festify_token');
     if (!token) return;
 
     fetch('/api/registrations/my', {

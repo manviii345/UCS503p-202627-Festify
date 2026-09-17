@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcrypt'
 
 const prisma = new PrismaClient()
+const SALT_ROUNDS = 12
 
 // ─── Venue Layout ────────────────────────────────────────────────────────────
 // Coordinate space: 1000 × 700 px (SVG units), representing an IIT-style campus.
@@ -151,27 +153,29 @@ const VENUE_ZONES = [
 
 async function main() {
   // ── Users ───────────────────────────────────────────────────────────────
+  const adminHashedPassword = await bcrypt.hash('password', SALT_ROUNDS)
   const admin = await prisma.user.upsert({
     where: { username: 'admin' },
-    update: {},
+    update: { password: adminHashedPassword },
     create: {
       username: 'admin',
-      password: 'password', // in a real app, hash this!
+      password: adminHashedPassword,
       role: 'ADMIN',
     },
   })
-  console.log('Created Admin:', admin)
+  console.log('Created/Updated Admin:', admin.username)
 
+  const studentHashedPassword = await bcrypt.hash('password', SALT_ROUNDS)
   const student = await prisma.user.upsert({
     where: { username: 'student' },
-    update: {},
+    update: { password: studentHashedPassword },
     create: {
       username: 'student',
-      password: 'password', // in a real app, hash this!
+      password: studentHashedPassword,
       role: 'STUDENT',
     },
   })
-  console.log('Created Student:', student)
+  console.log('Created/Updated Student:', student.username)
 
   // ── Fest Entity ─────────────────────────────────────────────────────────
   const fest = await prisma.fest.upsert({

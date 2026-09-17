@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface EventDetailsModalProps {
@@ -12,10 +12,16 @@ export default function EventDetailsModal({ event, isOpen, onClose, onRegistered
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Reset status message whenever the event changes — prevents success state
+  // from leaking across different event modals.
+  useEffect(() => {
+    setStatusMsg(null);
+  }, [event?.id]);
+
   if (!isOpen || !event) return null;
 
   const handleRegister = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('festify_token');
     if (!token) {
       setStatusMsg({ type: 'error', text: 'Please log in as a student to register for this event.' });
       return;
@@ -40,7 +46,7 @@ export default function EventDetailsModal({ event, isOpen, onClose, onRegistered
       } else {
         setStatusMsg({
           type: 'success',
-          text: '🎉 Registration successful! Your digital QR pass is ready under "My Events".',
+          text: 'Registration successful! Your QR pass is ready under "My Events".',
         });
         if (onRegistered) onRegistered();
       }
@@ -98,15 +104,9 @@ export default function EventDetailsModal({ event, isOpen, onClose, onRegistered
                   {event.name}
                 </h2>
                 <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-[#1A1A1A]/70 uppercase tracking-widest">
-                  <span className="flex items-center gap-1.5">
-                    <span>📅</span> {event.date}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span>🕐</span> {event.startTime}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span>📍</span> {event.venue}
-                  </span>
+                  <span>{event.date}</span>
+                  <span>{event.startTime}</span>
+                  <span>{event.venue}</span>
                 </div>
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function EventDetailsModal({ event, isOpen, onClose, onRegistered
                   disabled={loading}
                   className="px-8 py-3 bg-[#EC6484] text-[#1A1A1A] font-black text-sm rounded-xl border-2 border-[#1A1A1A] shadow-[4px_4px_0px_#1A1A1A] hover:bg-[#F06E38] hover:text-white transition-colors uppercase tracking-wider disabled:opacity-60"
                 >
-                  {loading ? 'Registering...' : 'Register Now ➔'}
+                  {loading ? 'Registering...' : 'Register Now'}
                 </button>
               )}
             </div>
@@ -175,4 +175,3 @@ export default function EventDetailsModal({ event, isOpen, onClose, onRegistered
     </AnimatePresence>
   );
 }
-
