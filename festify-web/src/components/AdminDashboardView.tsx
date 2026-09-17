@@ -43,7 +43,7 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
   // Parse the admin's user ID from the stored JWT for tenant-scoped venue queries
   const adminFestId = (() => {
     try {
-      const token = localStorage.getItem('festify_token') || localStorage.getItem('token');
+      const token = localStorage.getItem('festify_token');
       if (!token) return 1;
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (payload.role === 'ADMIN' && typeof payload.id === 'number') {
