@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: #F7F2E7;
+    font-family: 'Fredoka', sans-serif;
+    color: #1A1A1A;
+    overflow-x: hidden;
+  }
+}
+
+/* ─── Groovy Bubble Title ─── */
+.groovy-title {
+  font-family: 'Shrikhand', cursive;
+  color: #EE5F5B;
+  -webkit-text-stroke: 3px #1A1A1A;
+  text-shadow: 4px 4px 0px #1A1A1A;
+  letter-spacing: 0.02em;
+}
+
+/* Inline (per-letter) groovy style used inside flex layouts */
+.groovy-letter {
+  font-family: 'Shrikhand', cursive;
+  color: #EE5F5B;
+  -webkit-text-stroke: 3px #1A1A1A;
+  text-shadow: 4px 4px 0px #1A1A1A;
+  display: inline-block;
+  line-height: 1;
+}
+
+.groovy-logo-small {
+  font-family: 'Shrikhand', cursive;
+  color: #1A1A1A;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Pill Buttons ─── */
+.btn-groovy-orange {
+  background-color: #F06E38;
+  color: #1A1A1A;
+  border: 3px solid #1A1A1A;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: 4px 4px 0px #1A1A1A;
+  transition: transform 0.15s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.15s cubic-bezier(0.22,1,0.36,1);
+}
+.btn-groovy-orange:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #1A1A1A;
+}
+.btn-groovy-orange:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #1A1A1A;
+}
+
+.btn-groovy-yellow {
+  background-color: #F4C430;
+  color: #1A1A1A;
+  border: 3px solid #1A1A1A;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: 4px 4px 0px #1A1A1A;
+  transition: transform 0.15s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.15s cubic-bezier(0.22,1,0.36,1);
+}
+.btn-groovy-yellow:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #1A1A1A;
+}
+.btn-groovy-yellow:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #1A1A1A;
+}
+
+.btn-groovy-pink {
+  background-color: #F48FB1;
+  color: #1A1A1A;
+  border: 2px solid #1A1A1A;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: 3px 3px 0px #1A1A1A;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-groovy-pink:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #1A1A1A;
+}
+
+/* ─── Typewriter cursor blink ─── */
+.typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: #F06E38;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink-cursor 0.6s step-end infinite;
+}
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ─── Speech bubble pointer (CSS triangle) ─── */
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 8px 10px 8px 0;
+  border-style: solid;
+  border-color: transparent #1A1A1A transparent transparent;
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px 8px 6px 0;
+  border-style: solid;
+  border-color: transparent #F7F2E7 transparent transparent;
+}
+
+/* ─── Dashboard cards ─── */
+.dashboard-card {
+  background-color: #EFE8D8;
+  border: 2px solid #1A1A1A;
+  border-radius: 16px;
+}
+
+/* ─── Stamp frame (legacy) ─── */
+.stamp-frame {
+  background-color: #efe3c8;
+  border: 2px solid #1A1A1A;
+  border-radius: 4px;
+}

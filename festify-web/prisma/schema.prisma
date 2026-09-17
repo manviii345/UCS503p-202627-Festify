@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// VenueZone: represents a polygon zone or point landmark on the campus venue map.
+// 'coordinates' is stored as a JSON string:
+//   - zones (polygon):  "[[x1,y1],[x2,y2],...]"
+//   - landmarks (point): "[x,y]"
+// 'festId' maps to the admin User.id who owns this fest — used for tenant isolation.
+model VenueZone {
+  id          Int      @id @default(autoincrement())
+  name        String
+  // discriminator: "zone" | "landmark"
+  type        String   @default("zone")
+  // category: "stage" | "food" | "gate" | "restroom" | "parking" | "registration" | "firstaid" | "other"
+  category    String   @default("other")
+  // JSON-encoded coordinate array (see comment above)
+  coordinates String
+  color       String   @default("#F4C430")
+  description String?
+  icon        String?
+  // tenant isolation: which admin user's fest this belongs to
+  festId      Int
+  createdAt   DateTime @default(now())
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  username      String         @unique
+  password      String
+  role          String         // 'ADMIN' or 'STUDENT'
+  events        Event[]
+  registrations Registration[]
+}
+
+model Event {
+  id                  Int            @id @default(autoincrement())
+  name                String
+  description         String
+  image               String?
+  category            String
+  date                String
+  startTime           String
+  endTime             String
+  venue               String
+  maxParticipants     Int
+  registrationDeadline String
+  rules               String?
+  prizes              String?
+  contact             String?
+  status              String         @default("Upcoming")
+  createdAt           DateTime       @default(now())
+  
+  createdById         Int
+  createdBy           User           @relation(fields: [createdById], references: [id])
+  registrations       Registration[]
+}
+
+model Registration {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId     Int
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  qrToken     String    @unique
+  status      String    @default("REGISTERED") // "REGISTERED" | "CHECKED_IN" | "CANCELLED"
+  checkedInAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, eventId])
+}
+
