@@ -8,9 +8,11 @@ const prisma = new PrismaClient();
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 /**
- * Ray-casting point-in-polygon test.
- * polygon: array of [x, y] pairs
- * Returns true if the point (px, py) is inside the polygon.
+ * PostGIS Spatial Query Processing Notes:
+ *   - ST_AsGeoJSON(geometry): Converts spatial geometry column to GeoJSON object string.
+ *   - ST_GeomFromGeoJSON(geojson): Constructs geometry object from GeoJSON.
+ *   - ST_Contains(polygon, point): Native spatial containment query.
+ * Ray-casting point-in-polygon algorithm below acts as secondary in-memory solver for local SVG canvas.
  */
 function pointInPolygon(px: number, py: number, polygon: number[][]): boolean {
   let inside = false;

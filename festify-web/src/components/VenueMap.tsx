@@ -38,14 +38,14 @@ const MAP_H = 700;
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function VenueMap({ festId, readOnly = false }: VenueMapProps) {
+export default function VenueMap({ festId, readOnly: _readOnly = false }: VenueMapProps) {
   const [zones, setZones] = useState<VenueZoneData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedZone, setSelectedZone] = useState<VenueZoneData | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [locateResult, setLocateResult] = useState<VenueZoneData | null | 'none'>('none');
+  const [_locateResult, setLocateResult] = useState<VenueZoneData | null | 'none'>('none');
   const [locating, setLocating] = useState(false);
 
   // Pan & zoom state

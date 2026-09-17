@@ -299,6 +299,13 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
               </div>
             </div>
 
+            {/* 
+              TODO: REAL-TIME PUSH SEAM (Socket.IO & Redis)
+              Currently, these metric cards render static overview numbers and local React state.
+              Future architecture integration point:
+                1. Socket.IO client hook: subscribe to 'fest:metrics:update' room for live attendee / registration counters.
+                2. Redis ephemeral crowd telemetry: buffer gate check-in pings in Redis hyperloglog / pubsub before flushing.
+            */}
             {/* 3 Metric Cards Row matching Screenshot 2 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Metric 1 */}

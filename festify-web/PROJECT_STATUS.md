@@ -1,40 +1,159 @@
-# Festify — Project Status & Technical Documentation
+# Festify — Technical Codebase Audit & Project Status Report
 
-Festify is a multi-tenant college fest management web platform featuring interactive vector campus venue maps, event management, atomic capacity-locked registration, signed JWT QR code passes, and gate check-in verification.
-
----
-
-## 1. Architecture Overview
-
-- **Frontend**: React 18, TypeScript, Vite, TailwindCSS, Framer Motion, Canvas / Three.js (3D Digital Pass), Vite PWA (Offline-ready caching).
-- **Backend**: Node.js, Express (TypeScript via `tsx`), JSON Web Tokens (JWT), Role-Based Access Control (`authenticateJWT`, `requireAdmin`).
-- **Database & ORM**: SQLite (`dev.db`), Prisma ORM (`@prisma/client` v5.22).
-- **Tenant Isolation**: Multi-tenant partitioning where each Fest is owned by an admin `User.id` (`festId` / `createdById`). All admin write routes strictly enforce tenant ownership.
-- **Concurrency & Transaction Safety**: Registration endpoint executes inside a serializable `prisma.$transaction` block, ensuring atomic capacity checks and unique constraints so concurrent registrations cannot overbook limited seats.
-- **Venue Vector Engine**: Local campus plan rendered using an SVG coordinate system (`1000 × 700` viewBox) with ray-casting point-in-polygon lookup for zone location.
+*Generated Snapshot Date: September 17, 2026*  
+*Target Environment: Node.js / Express / Prisma ORM / SQLite / React / Vite / PWA*
 
 ---
 
-## 2. Implemented Modules & Status
+## Executive Summary & Runtime Reality
 
-| Module | Features & Purpose | API Endpoints | Key Files | Status |
-|---|---|---|---|---|
-| **Auth & RBAC** | User login, JWT token issuance, role-based access (`ADMIN` vs `STUDENT`). | `POST /api/auth/login` | [server/routes/auth.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/auth.ts)<br/>[server/middleware/auth.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/middleware/auth.ts) | ✅ Working |
-| **Event Management** | CRUD operations for fest events with live capacity tracking & remaining seats. | `GET /api/events`<br/>`GET /api/fests/:festId/events`<br/>`GET /api/admin/events`<br/>`POST /api/admin/events`<br/>`PUT /api/admin/events/:id`<br/>`DELETE /api/admin/events/:id` | [server/routes/events.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/events.ts)<br/>[src/components/CreateEventModal.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/CreateEventModal.tsx) | ✅ Working |
-| **Interactive Venue Map** | SVG campus map with category filters, pan/zoom, click inspection, locate API (ray-casting point-in-polygon). | `GET /api/fests/:festId/venue`<br/>`POST /api/fests/:festId/venue/zones`<br/>`POST /api/fests/:festId/venue/locate` | [server/routes/venue.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/venue.ts)<br/>[src/components/VenueMap.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/VenueMap.tsx) | ✅ Working |
-| **Registration & QR Passes** | Capacity-locked student registration, signed QR JWT pass generation, My Passes tab, and gate check-in validation. | `POST /api/events/:eventId/register`<br/>`GET /api/registrations/my`<br/>`POST /api/registrations/:registrationId/checkin` | [server/routes/events.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/events.ts)<br/>[src/components/EventDetailsModal.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/EventDetailsModal.tsx)<br/>[src/components/StudentUserView.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/StudentUserView.tsx) | ✅ Working |
+This document provides a strict, evidence-based technical audit of the **Festify** codebase as it actually exists in repository source files and database tables.
+
+- **Verified Running Core**: Interactive 2D Vector Campus Venue Map (SVG engine with ray-casting point-in-polygon locate), Event CRUD & Capacity Tracking, Atomic Concurrency-Safe Student Event Registration (`prisma.$transaction`), Signed JWT QR Code Pass Generation, and Gate Scanner Verification.
+- **Partially Implemented**: Authentication & RBAC (Login works, but no User Signup API and plain-text passwords), Multi-Tenancy (scoped on reads/creates, but missing on event update/delete), Organizer Dashboard (real event/map tabs, but overview metrics & attendee table use hardcoded mock data).
+- **Not Started / UI Mock Only**: Real-time Crowd Density Telemetry & Gate Hardware Scanning, Push Notifications System.
 
 ---
 
-## 3. Database Schema
+## 1. Module-by-Module Audit
 
-Defined in [prisma/schema.prisma](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/prisma/schema.prisma):
+### 1.1 Authentication & RBAC
+- **Status**: **PARTIALLY IMPLEMENTED**
+- **Files**:
+  - Backend: [server/routes/auth.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/auth.ts), [server/middleware/auth.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/middleware/auth.ts)
+  - Frontend: [src/components/LoginModal.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/LoginModal.tsx)
+- **API Endpoints**:
+  - `POST /api/auth/login` (Public)
+- **End-to-End Verification**:
+  - **Login Flow**: **Working**. `POST /api/auth/login` verifies credentials against the database and signs a JWT token containing `{ id, username, role }`.
+  - **JWT Verification**: **Working**. `authenticateJWT` extracts `Authorization: Bearer <token>` and verifies it using `JWT_SECRET`.
+  - **RBAC Enforcement**: **Working**. `requireAdmin` checks `req.user.role === 'ADMIN'` and returns `403 Forbidden` for non-admin users on protected admin endpoints.
+- **What is Broken / Missing**:
+  - ❌ **No User Signup API**: There is NO `POST /api/auth/register` or registration endpoint for new users. Users can only be created by seeding the database via `prisma/seed.ts`.
+  - ❌ **Plain Text Passwords**: Passwords are compared directly (`user.password !== password`) without `bcrypt` or Argon2 hashing.
+  - ⚠️ **Token Key Mismatch**: `LoginModal.tsx` stores both `festify_token` and `token` in `localStorage`. If `token` is missing or cleared, certain frontend components fallback to unauthenticated state.
+
+---
+
+### 1.2 Multi-Tenancy
+- **Status**: **PARTIALLY IMPLEMENTED**
+- **Files**:
+  - [server/routes/venue.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/venue.ts)
+  - [server/routes/events.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/events.ts)
+- **API Endpoints**:
+  - `GET /api/fests/:festId/venue` (Tenant-scoped)
+  - `POST /api/fests/:festId/venue/zones` (Tenant isolation enforced)
+  - `GET /api/fests/:festId/events` (Tenant-scoped)
+- **End-to-End Verification**:
+  - Multi-tenancy is modeled implicitly by assigning an admin user ID (`festId` / `createdById`) to events and venue zones.
+  - `POST /api/fests/:festId/venue/zones` checks `if (req.user!.id !== festId)` and rejects cross-tenant writes with `403 Forbidden`.
+  - Verified by integration tests in `server/venue.test.ts`.
+- **What is Broken / Missing**:
+  - ❌ **No Dedicated `Fest` Entity**: Fests do not exist as a table in the database; festId is simply an alias for an admin `User.id`.
+  - ⚠️ **Cross-Tenant Event Mutation Vulnerability**: In `server/routes/events.ts`, `PUT /api/admin/events/:id` and `DELETE /api/admin/events/:id` update/delete events by primary key without checking if `event.createdById === req.user.id`. Any logged-in admin can edit or delete events owned by another admin.
+
+---
+
+### 1.3 Fest & Event Management
+- **Status**: **IMPLEMENTED**
+- **Files**:
+  - Backend: [server/routes/events.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/events.ts)
+  - Frontend: [src/components/CreateEventModal.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/CreateEventModal.tsx), [src/components/EventDetailsModal.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/EventDetailsModal.tsx)
+- **API Endpoints**:
+  - `GET /api/events` (Public event list with live `registeredCount` and `remainingSeats`)
+  - `GET /api/fests/:festId/events` (Public tenant event list)
+  - `GET /api/admin/events` (Admin event list)
+  - `POST /api/admin/events` (Admin create event)
+  - `PUT /api/admin/events/:id` (Admin update event)
+  - `DELETE /api/admin/events/:id` (Admin delete event)
+- **End-to-End Verification**:
+  - **Working**. Events can be listed, created, updated, and deleted. Live capacity calculation computes `remainingSeats = Math.max(0, maxParticipants - registeredCount)`. Frontend modals render rules, deadlines, prizes, and seat availability.
+
+---
+
+### 1.4 Registration & QR Passes
+- **Status**: **IMPLEMENTED**
+- **Files**:
+  - Backend: [server/routes/events.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/events.ts)
+  - Tests: [server/registration.test.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/registration.test.ts)
+  - Frontend: [src/components/StudentUserView.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/StudentUserView.tsx), [src/components/EventDetailsModal.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/EventDetailsModal.tsx)
+- **API Endpoints**:
+  - `POST /api/events/:eventId/register` (Protected student registration)
+  - `GET /api/registrations/my` (Protected student pass listing)
+  - `POST /api/registrations/:registrationId/checkin` (Protected gate check-in)
+- **End-to-End Verification**:
+  - **Atomic Transaction Safety**: Registration is executed inside a `prisma.$transaction` block to guarantee atomic capacity checks and prevent race conditions when registration occurs for the last remaining seat. Verified by automated concurrency tests firing simultaneous requests (`7/7` tests passing in `server/registration.test.ts`).
+  - **Signed QR Token**: Issues JWT encoding `{ userId, eventId, registrationId, issuedAt }`.
+  - **Frontend Rendering**: `StudentUserView.tsx` features a "My Passes" tab rendering scannable QR codes generated via `qrcode`.
+  - **Gate Check-in**: `POST /registrations/:id/checkin` verifies JWT token signatures and updates status to `CHECKED_IN`.
+
+---
+
+### 1.5 Interactive Venue Map
+- **Status**: **IMPLEMENTED**
+- **Files**:
+  - Backend: [server/routes/venue.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/venue.ts)
+  - Tests: [server/venue.test.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/venue.test.ts)
+  - Frontend: [src/components/VenueMap.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/VenueMap.tsx)
+- **API Endpoints**:
+  - `GET /api/fests/:festId/venue` (Public venue zone array)
+  - `POST /api/fests/:festId/venue/zones` (Admin zone creation)
+  - `POST /api/fests/:festId/venue/locate` (Point-in-polygon & landmark radius lookup)
+- **End-to-End Verification**:
+  - **Working**. Renders a vector campus layout inside an SVG canvas (`1000 × 700` viewBox).
+  - Features pan/zoom controls, category filter chips (Stages, Food, Gates, Parking, Restrooms, First Aid, Info), click-to-inspect side panel, and ray-casting point-in-polygon locate lookup.
+  - Automatically seeds default campus layout if the database table is empty (`7/7` tests passing in `server/venue.test.ts`).
+
+---
+
+### 1.6 Organizer Dashboard
+- **Status**: **PARTIALLY IMPLEMENTED**
+- **Files**:
+  - [src/components/AdminDashboardView.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/AdminDashboardView.tsx)
+- **What is Working**:
+  - Sidebar tab navigation between Overview, Events, Registrations, Scanner, and Venue Map.
+  - **Event Management Tab**: Connected to `/api/admin/events` backend API (lists, creates, updates, deletes events).
+  - **Venue Map Tab**: Embeds live `<VenueMap>` connected to `/api/fests/:festId/venue`.
+- **What is UI Mock / Broken**:
+  - ❌ **Overview Metric Cards**: Metrics such as *Total Revenue ($42.8k)*, *Total Tickets (1,280)*, *Active Events (4)*, and *Live Attendees (842)* are hardcoded static values in JSX.
+  - ❌ **Registrations Table Tab**: Displays a static, hardcoded array `INITIAL_REGISTRATIONS` (`Aarav Kapoor`, `Riya Desai`, etc.) instead of querying real rows from the `Registration` database table.
+
+---
+
+### 1.7 Notifications System
+- **Status**: **NOT STARTED AT ALL (UI MOCK ONLY)**
+- **Files**:
+  - [src/components/AdminDashboardView.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/AdminDashboardView.tsx#L515)
+- **Reality**:
+  - There is NO database table for notifications, NO push notification service integration (Web Push API / Firebase Cloud Messaging), and NO WebSocket/SSE streaming endpoint.
+  - Clicking "Dispatch Alert" in the modal simply executes `confetti({ particleCount: 30 })` in the browser and closes the modal dialog.
+
+---
+
+### 1.8 Crowd Density & Gate Telemetry Module
+- **Status**: **NOT STARTED AT ALL (UI MOCK ONLY)**
+- **Files**:
+  - [src/three/GateScannerCanvas.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/three/GateScannerCanvas.tsx)
+- **Reality**:
+  - There is NO real-time density monitoring, NO Bluetooth/beacon telemetry, NO heatmaps, and NO camera QR scanning hardware hook.
+  - The "3D Gate Scanner" tab renders a static 3D canvas animation (`GateScannerCanvas.tsx`) with a manual "Simulate Scan" button that increments a local React state counter.
+
+---
+
+## 2. Database Schema (Current SQLite Instance)
+
+Extracted directly from [prisma/schema.prisma](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/prisma/schema.prisma):
 
 ```prisma
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
 model User {
   id            Int            @id @default(autoincrement())
   username      String         @unique
-  password      String
+  password      String         // Plain text string (unhashed)
   role          String         // 'ADMIN' or 'STUDENT'
   events        Event[]
   registrations Registration[]
@@ -68,11 +187,11 @@ model VenueZone {
   name        String
   type        String   @default("zone")       // "zone" | "landmark"
   category    String   @default("other")      // "stage" | "food" | "gate" | "restroom" | "parking" | etc.
-  coordinates String                          // JSON string: "[[x1,y1],...]" for zones, "[x,y]" for landmarks
+  coordinates String                          // JSON string: "[[x1,y1],...]" or "[x,y]"
   color       String   @default("#F4C430")
   description String?
   icon        String?
-  festId      Int                             // Tenant admin user ID
+  festId      Int                             // Admin User.id (Tenant ID)
   createdAt   DateTime @default(now())
 }
 
@@ -91,53 +210,29 @@ model Registration {
 }
 ```
 
----
-
-## 4. How to Run Locally
-
-1. **Install Dependencies**:
-   ```powershell
-   npm install
-   ```
-
-2. **Sync Database Schema**:
-   ```powershell
-   npx prisma db push
-   ```
-
-3. **Seed Campus Data (Users, Events, 14 Venue Zones)**:
-   ```powershell
-   npx tsx prisma/seed.ts
-   ```
-
-4. **Start Development Application**:
-   ```powershell
-   npm run dev
-   ```
-   - Vite Frontend: `http://localhost:5173`
-   - Express Backend API: `http://localhost:3000`
+### Schema Drift & Planned vs. Existing Analysis:
+- ❌ **No `Fest` Table**: Planned multi-tenant `Fest` model does not exist. Fests are mapped to admin `User.id`.
+- ❌ **No PostGIS Spatial Columns**: Planned PostgreSQL PostGIS `GEOMETRY` column is running on SQLite stringified JSON arrays.
+- ❌ **No `Notification` Table**: Missing entirely.
+- ❌ **No `GateLog` / `CrowdDensity` Table**: Missing entirely.
 
 ---
 
-## 5. How to Test Each Module
+## 3. What Currently Runs vs. Code / UI Mocks
 
-### 1. Venue Map Integration Tests
-Validates GET venue zones, tenant isolation (403 on cross-tenant zone creation), empty fest return, point-in-polygon locate hits/misses, and unauthorized protection:
-```powershell
-npx tsx server/venue.test.ts
-```
-*Expected output: `7 passed, 0 failed`*
-
-### 2. Registration & Concurrency Tests
-Validates capacity calculation, concurrent registration capacity locking (`Promise.all` with 1 remaining seat), signed QR token generation, duplicate registration prevention, and gate check-in:
-```powershell
-npx tsx server/registration.test.ts
-```
-*Expected output: `7 passed, 0 failed`*
-
----
-
-## 6. Known Issues / TODOs
-
-1. **PostgreSQL / PostGIS Migration Path**: The current environment runs on SQLite using stringified JSON coordinates and in-memory ray-casting. For production deployment to PostgreSQL with PostGIS, update `schema.prisma` provider to `postgresql` and replace `coordinates` string with PostGIS `GEOMETRY(Geometry, 3857)` column.
-2. **Scanner App UI Integration**: The gate check-in API `POST /api/registrations/:id/checkin` is fully working; a dedicated mobile camera QR scanner view can be built for gate stewards in a future iteration.
+| Feature / Code Path | Actually Runs & Verified? | Verification Evidence |
+|---|---|---|
+| **User Login (`/api/auth/login`)** | ✅ **Runs** | Tested via cURL & LoginModal component |
+| **Event CRUD (`/api/admin/events`)** | ✅ **Runs** | Tested via Admin Dashboard & CreateEventModal |
+| **Event Capacity & Remaining Seats** | ✅ **Runs** | Dynamically computed on `GET /events` |
+| **Atomic Concurrency Registration** | ✅ **Runs** | Verified by 7/7 tests in `registration.test.ts` |
+| **Signed QR Ticket Issuance & Render** | ✅ **Runs** | JWT signed & rendered via `qrcode` in Student View |
+| **Gate Check-in Validation** | ✅ **Runs** | Verified by `POST /registrations/:id/checkin` |
+| **Interactive Vector Venue Map** | ✅ **Runs** | Verified by 7/7 tests in `venue.test.ts` |
+| **Ray-Casting Point-in-Polygon Locate** | ✅ **Runs** | Tested via `POST /venue/locate` & UI button |
+| **User Signup / Registration API** | ❌ **UI Mock / Missing** | No API endpoint exists |
+| **Password Hashing (`bcrypt`)** | ❌ **Missing** | Passwords stored as plain text |
+| **Cross-Tenant Event Write Protection** | ❌ **Vulnerable** | `PUT/DELETE /admin/events/:id` missing tenant check |
+| **Admin Registrations Table** | ❌ **UI Mock** | Renders static `INITIAL_REGISTRATIONS` array |
+| **Emergency Broadcast Alert** | ❌ **UI Mock** | Triggers confetti animation only |
+| **3D Gate Scanner Hardware Scanning** | ❌ **UI Mock** | Manual button & Three.js animation only |

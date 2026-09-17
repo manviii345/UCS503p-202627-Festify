@@ -6,30 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-// VenueZone: represents a polygon zone or point landmark on the campus venue map.
-// 'coordinates' is stored as a JSON string:
-//   - zones (polygon):  "[[x1,y1],[x2,y2],...]"
-//   - landmarks (point): "[x,y]"
-// 'festId' maps to the admin User.id who owns this fest — used for tenant isolation.
-model VenueZone {
-  id          Int      @id @default(autoincrement())
-  name        String
-  // discriminator: "zone" | "landmark"
-  type        String   @default("zone")
-  // category: "stage" | "food" | "gate" | "restroom" | "parking" | "registration" | "firstaid" | "other"
-  category    String   @default("other")
-  // JSON-encoded coordinate array (see comment above)
-  coordinates String
-  color       String   @default("#F4C430")
-  description String?
-  icon        String?
-  // tenant isolation: which admin user's fest this belongs to
-  festId      Int
-  createdAt   DateTime @default(now())
 }
 
 model User {
@@ -37,8 +15,22 @@ model User {
   username      String         @unique
   password      String
   role          String         // 'ADMIN' or 'STUDENT'
-  events        Event[]
+  ownedFests    Fest[]         @relation("FestOwner")
+  events        Event[]        @relation("EventCreator")
   registrations Registration[]
+}
+
+model Fest {
+  id         Int         @id @default(autoincrement())
+  name       String
+  startDate  String?
+  endDate    String?
+  branding   String?
+  ownerId    Int
+  owner      User        @relation("FestOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  events     Event[]
+  venueZones VenueZone[]
+  createdAt  DateTime    @default(now())
 }
 
 model Event {
@@ -58,10 +50,28 @@ model Event {
   contact             String?
   status              String         @default("Upcoming")
   createdAt           DateTime       @default(now())
-  
+
   createdById         Int
-  createdBy           User           @relation(fields: [createdById], references: [id])
+  createdBy           User           @relation("EventCreator", fields: [createdById], references: [id])
+  festId              Int?
+  fest                Fest?          @relation(fields: [festId], references: [id], onDelete: Cascade)
   registrations       Registration[]
+}
+
+// VenueZone: represents a polygon zone or point landmark on the campus venue map.
+// 'coordinates' stores GeoJSON geometry format (rendered via PostGIS ST_AsGeoJSON / ST_Contains).
+model VenueZone {
+  id          Int      @id @default(autoincrement())
+  name        String
+  type        String   @default("zone")       // "zone" | "landmark"
+  category    String   @default("other")      // "stage" | "food" | "gate" | "restroom" | "parking" | etc.
+  coordinates String                          // GeoJSON coordinate array string
+  color       String   @default("#F4C430")
+  description String?
+  icon        String?
+  festId      Int
+  fest        Fest     @relation(fields: [festId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
 }
 
 model Registration {
@@ -77,4 +87,3 @@ model Registration {
 
   @@unique([userId, eventId])
 }
-

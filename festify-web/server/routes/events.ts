@@ -93,11 +93,21 @@ router.post('/admin/events', authenticateJWT, requireAdmin, async (req: AuthRequ
   }
 });
 
-// PUT update event (Admin only)
+// PUT update event (Admin only — Tenant Ownership Enforced)
 router.put('/admin/events/:id', authenticateJWT, requireAdmin, async (req: AuthRequest, res) => {
   try {
     const eventId = Number(req.params.id);
     const updates = req.body;
+
+    const existing = await prisma.event.findUnique({ where: { id: eventId } });
+    if (!existing) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    // Tenant Isolation Check: Admin can only edit their own fest's events
+    if (existing.createdById !== req.user!.id) {
+      return res.status(403).json({ error: 'Forbidden: You do not own this event' });
+    }
 
     const event = await prisma.event.update({
       where: { id: eventId },
@@ -111,10 +121,21 @@ router.put('/admin/events/:id', authenticateJWT, requireAdmin, async (req: AuthR
   }
 });
 
-// DELETE event (Admin only)
+// DELETE event (Admin only — Tenant Ownership Enforced)
 router.delete('/admin/events/:id', authenticateJWT, requireAdmin, async (req: AuthRequest, res) => {
   try {
     const eventId = Number(req.params.id);
+
+    const existing = await prisma.event.findUnique({ where: { id: eventId } });
+    if (!existing) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    // Tenant Isolation Check: Admin can only delete their own fest's events
+    if (existing.createdById !== req.user!.id) {
+      return res.status(403).json({ error: 'Forbidden: You do not own this event' });
+    }
+
     await prisma.event.delete({ where: { id: eventId } });
     res.json({ success: true });
   } catch (error) {

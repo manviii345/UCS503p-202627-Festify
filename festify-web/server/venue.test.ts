@@ -70,11 +70,35 @@ function getPort(srv: http.Server): number {
 // ─── Run Tests ────────────────────────────────────────────────────────────────
 
 async function runTests() {
-  // Seed two pseudo-admin users (IDs 1 and 2 simulated via tokens only — no DB user needed for venue routes)
-  const FEST_A = 1; // admin user id 1
-  const FEST_B = 2; // admin user id 2
+  // Seed two admin users (IDs 1 and 2) and their corresponding Fest entities
+  const FEST_A = 1;
+  const FEST_B = 2;
   const tokenA = makeToken(FEST_A);
   const tokenB = makeToken(FEST_B);
+
+  await prisma.user.upsert({
+    where: { id: FEST_A },
+    update: {},
+    create: { id: FEST_A, username: 'test_admin_a', password: 'password', role: 'ADMIN' },
+  });
+  await prisma.user.upsert({
+    where: { id: FEST_B },
+    update: {},
+    create: { id: FEST_B, username: 'test_admin_b', password: 'password', role: 'ADMIN' },
+  });
+
+  if ((prisma as any).fest) {
+    await (prisma as any).fest.upsert({
+      where: { id: FEST_A },
+      update: {},
+      create: { id: FEST_A, name: 'Test Fest A', ownerId: FEST_A },
+    });
+    await (prisma as any).fest.upsert({
+      where: { id: FEST_B },
+      update: {},
+      create: { id: FEST_B, name: 'Test Fest B', ownerId: FEST_B },
+    });
+  }
 
   // Clean up any existing test data
   await prisma.venueZone.deleteMany({ where: { festId: { in: [FEST_A, FEST_B] } } });

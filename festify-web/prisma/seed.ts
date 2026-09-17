@@ -173,6 +173,27 @@ async function main() {
   })
   console.log('Created Student:', student)
 
+  // ── Fest Entity ─────────────────────────────────────────────────────────
+  const fest = await prisma.fest.upsert({
+    where: { id: 1 },
+    update: {
+      name: 'Aurora Fest 2026',
+      startDate: '2026-11-14',
+      endDate: '2026-11-16',
+      branding: 'aurora_2026_theme',
+      ownerId: admin.id,
+    },
+    create: {
+      id: 1,
+      name: 'Aurora Fest 2026',
+      startDate: '2026-11-14',
+      endDate: '2026-11-16',
+      branding: 'aurora_2026_theme',
+      ownerId: admin.id,
+    },
+  });
+  console.log('Created/Updated Fest Entity:', fest);
+
   // ── Events ──────────────────────────────────────────────────────────────
   const event1 = await prisma.event.create({
     data: {
@@ -187,6 +208,7 @@ async function main() {
       registrationDeadline: '2026-11-10',
       status: 'Upcoming',
       createdById: admin.id,
+      festId: fest.id,
       image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1600&q=80',
     }
   })
@@ -204,14 +226,14 @@ async function main() {
       registrationDeadline: '2026-11-12',
       status: 'Live',
       createdById: admin.id,
+      festId: fest.id,
       image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1600&q=80',
     }
   })
   console.log('Seeded Events:', event1.name, event2.name)
 
-  // ── Venue Zones (Tenant A = admin user) ────────────────────────────────
-  // Delete existing zones for this fest before re-seeding (idempotent)
-  await prisma.venueZone.deleteMany({ where: { festId: admin.id } })
+  // ── Venue Zones ────────────────────────────────────────────────────────
+  await prisma.venueZone.deleteMany({ where: { festId: fest.id } })
 
   for (const zone of VENUE_ZONES) {
     await prisma.venueZone.create({
@@ -223,11 +245,11 @@ async function main() {
         icon: zone.icon,
         description: zone.description,
         coordinates: JSON.stringify(zone.coordinates),
-        festId: admin.id,
+        festId: fest.id,
       },
     })
   }
-  console.log(`Seeded ${VENUE_ZONES.length} venue zones for festId=${admin.id} (admin)`)
+  console.log(`Seeded ${VENUE_ZONES.length} venue zones for festId=${fest.id} (owner=${admin.id})`)
 }
 
 main()
