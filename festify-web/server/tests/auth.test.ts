@@ -19,10 +19,10 @@
 import express from 'express';
 import http from 'http';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
-import authRoutes from './routes/auth.js';
-import { authenticateJWT, requireAdmin } from './middleware/auth.js';
+import authRoutes from '../routes/auth.js';
+import { authenticateJWT, requireAdmin } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';

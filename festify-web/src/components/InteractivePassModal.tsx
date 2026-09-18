@@ -17,25 +17,21 @@ function Pass3DModel() {
   return (
     <Float speed={2} rotationIntensity={0.6} floatIntensity={0.8}>
       <group ref={passRef} scale={1.2}>
-        {/* Pass Main Base */}
         <mesh castShadow receiveShadow>
           <boxGeometry args={[2.2, 3.2, 0.1]} />
           <meshStandardMaterial color="#F7F2E7" roughness={0.3} metalness={0.1} />
         </mesh>
 
-        {/* Top Header Bar Pink */}
         <mesh position={[0, 1.25, 0.06]}>
           <planeGeometry args={[2.1, 0.55]} />
           <meshStandardMaterial color="#EC6484" roughness={0.3} />
         </mesh>
 
-        {/* Gold Circular Stamp Seal */}
         <mesh position={[0, 0.5, 0.08]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.35, 0.35, 0.04, 32]} />
           <meshStandardMaterial color="#F4C430" roughness={0.2} metalness={0.7} />
         </mesh>
 
-        {/* Inner QR Code Box */}
         <mesh position={[0, -0.6, 0.08]}>
           <planeGeometry args={[1.2, 1.2]} />
           <meshStandardMaterial color="#1E1E1E" roughness={0.2} />
@@ -69,7 +65,6 @@ export default function InteractivePassModal({ onClose }: { onClose: () => void 
           <p className="text-xs text-[#1A1A1A]/70 font-semibold">Rotate pass in 3D WebGL space. Works 100% offline.</p>
         </div>
 
-        {/* 3D Canvas Pass Container */}
         <div className="w-full h-64 bg-[#EFE8D8] rounded-2xl border-2 border-[#1A1A1A] relative overflow-hidden mb-6">
           <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }}>
             <ambientLight intensity={0.9} />

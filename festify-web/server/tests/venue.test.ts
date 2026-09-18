@@ -19,7 +19,7 @@ import http from 'http';
 import assert from 'node:assert/strict';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import venueRoutes from './routes/venue.js';
+import venueRoutes from '../routes/venue.js';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 

@@ -67,7 +67,6 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
   const [showVenueMap, setShowVenueMap] = useState(false);
   const [activeTab, setActiveTab] = useState<'events' | 'passes'>('events');
 
-  // Students view the default admin's fest (festId=1)
   const STUDENT_FEST_ID = 1;
 
   const fetchEvents = () => {
@@ -103,7 +102,6 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
   return (
     <div className="min-h-screen bg-[#F7F2E7] text-[#1A1A1A] font-fredoka py-12 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Top Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-6 border-b-2 border-[#1A1A1A]">
           <div>
             <span className="px-3.5 py-1 bg-[#F4C430] text-[#1A1A1A] text-xs font-bold rounded-full border border-[#1A1A1A] uppercase tracking-wider">
@@ -122,15 +120,18 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
               🎟 VIEW 3D DIGITAL PASS
             </button>
             <button
-              onClick={onBackToLanding}
+              onClick={() => {
+                localStorage.removeItem('festify_token');
+                localStorage.removeItem('festify_role');
+                onBackToLanding();
+              }}
               className="px-4 py-2.5 text-xs font-bold border-2 border-[#1A1A1A] rounded-full hover:bg-[#1A1A1A] hover:text-white transition-colors"
             >
-              Back to Landing
+              Logout / Exit ➔
             </button>
           </div>
         </div>
 
-        {/* Tab Toggle: Events vs My Passes */}
         <div className="flex items-center gap-3 mb-8">
           <button
             onClick={() => setActiveTab('events')}
@@ -159,7 +160,6 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
 
         {activeTab === 'events' ? (
           <>
-            {/* 3D Rubber Stamp Feature Seal */}
             <div className="mb-12 flex flex-col md:flex-row items-center justify-between bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-3xl p-6 sm:p-8 shadow-[4px_4px_0px_#1A1A1A]">
               <div>
                 <span className="text-xs font-mono text-[#F06E38] font-bold uppercase tracking-wider">
@@ -183,7 +183,6 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
               <RubberStamp3D />
             </div>
 
-            {/* Filters */}
             <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
               <input 
                 type="text" 
@@ -209,7 +208,6 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
               </div>
             </div>
 
-            {/* Event Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
               {filteredEvents.map((event) => (
                 <div 
@@ -263,7 +261,6 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
             </div>
           </>
         ) : (
-          /* My Passes Tab */
           <div className="mb-16">
             {registrations.length === 0 ? (
               <div className="bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-2xl p-12 text-center shadow-[4px_4px_0px_#1A1A1A]">
@@ -289,7 +286,6 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
           </div>
         )}
 
-        {/* ── Venue Map Section ─────────────────────────────────────────────── */}
         <div className="mb-16">
           <div
             className="flex items-center justify-between mb-4 cursor-pointer"

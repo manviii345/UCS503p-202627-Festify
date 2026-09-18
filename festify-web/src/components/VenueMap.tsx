@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export interface VenueZoneData {
   id: number;
   name: string;
@@ -17,8 +15,6 @@ interface VenueMapProps {
   festId: number;
   readOnly?: boolean;
 }
-
-// ─── Category config ─────────────────────────────────────────────────────────
 
 const CATEGORIES = [
   { key: 'all', label: 'All', emoji: '🗺️' },
@@ -36,8 +32,6 @@ const CATEGORIES = [
 const MAP_W = 1000;
 const MAP_H = 700;
 
-// ─── Component ───────────────────────────────────────────────────────────────
-
 export default function VenueMap({ festId, readOnly: _readOnly = false }: VenueMapProps) {
   const [zones, setZones] = useState<VenueZoneData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +39,6 @@ export default function VenueMap({ festId, readOnly: _readOnly = false }: VenueM
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedZone, setSelectedZone] = useState<VenueZoneData | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [_locateResult, setLocateResult] = useState<VenueZoneData | null | 'none'>('none');
   const [locating, setLocating] = useState(false);
 
   // Pan & zoom state
@@ -55,18 +48,12 @@ export default function VenueMap({ festId, readOnly: _readOnly = false }: VenueM
     active: false, startX: 0, startY: 0, tx: 0, ty: 0,
   });
 
-  // ── Fetch zones ────────────────────────────────────────────────────────────
-  // FIX SITE COMMENT (PART 1):
-  // Root cause of blank map: Initially the VenueZone table had 0 seeded rows for festId=1,
-  // returning { festId: 1, zones: [] }. Additionally, coordinates are stored as a stringified
-  // JSON array in SQLite and must be parsed back to numeric arrays for rendering in SVG 1000x700 viewBox.
   useEffect(() => {
     const targetFestId = festId || 1;
     setLoading(true);
     fetch(`/api/fests/${targetFestId}/venue`)
       .then((r) => r.json())
       .then((data) => {
-        console.log('Venue map fetch response:', data);
         setZones(data.zones || []);
         setLoading(false);
       })
@@ -76,7 +63,6 @@ export default function VenueMap({ festId, readOnly: _readOnly = false }: VenueM
       });
   }, [festId]);
 
-  // ── Pan handlers ───────────────────────────────────────────────────────────
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if ((e.target as Element).closest('[data-zone]')) return;
     dragRef.current = { active: true, startX: e.clientX, startY: e.clientY, tx: transform.x, ty: transform.y };
@@ -104,7 +90,6 @@ export default function VenueMap({ festId, readOnly: _readOnly = false }: VenueM
 
   const resetView = () => setTransform({ x: 0, y: 0, scale: 1 });
 
-  // ── Locate demo ────────────────────────────────────────────────────────────
   const handleLocate = async () => {
     setLocating(true);
     const targetFestId = festId || 1;
@@ -117,22 +102,17 @@ export default function VenueMap({ festId, readOnly: _readOnly = false }: VenueM
       });
       const data = await res.json();
       if (data.zone) {
-        setLocateResult(data.zone);
         setSelectedZone(data.zone);
-      } else {
-        setLocateResult(null);
       }
     } catch {
-      setLocateResult(null);
+      // Ignore locate error
     } finally {
       setLocating(false);
     }
   };
 
-  // ── Filtered zones ─────────────────────────────────────────────────────────
   const visible = zones.filter((z) => activeCategory === 'all' || z.category === activeCategory);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
   const polygonPoints = (coords: number[][]) => coords.map(([x, y]) => `${x},${y}`).join(' ');
 
   const centroid = (coords: number[][]): [number, number] => {
@@ -141,7 +121,6 @@ export default function VenueMap({ festId, readOnly: _readOnly = false }: VenueM
     return [cx, cy];
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Header row */}

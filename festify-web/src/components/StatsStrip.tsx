@@ -3,17 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import { STATS } from '../mockData';
 import type { StatStrip } from '../types';
 
-/* ─────────────────────────────────────────────────────────────────
-   StatsStrip — burnt-orange section with 3 dashed-circle counters
-
-   🎓 TEACHING NOTE: requestAnimationFrame for count-up animation
-   We already covered this in the first version. Here, each counter is
-   styled as a "rubber stamp impression" — a dashed circular border,
-   slightly tilted, with the number in Alfa Slab One.
-   The tilt angles below are INTENTIONALLY inconsistent (like real
-   hand-stamped impressions that are never perfectly aligned).
-───────────────────────────────────────────────────────────────── */
-
+// Deliberate non-uniform tilt angles simulate hand-stamped impressions.
 const TILTS = [-4, 2, -2.5]; // degrees of rotation per stat
 
 function easeOutQuart(t: number) {
@@ -78,7 +68,6 @@ function Counter({ stat, index }: { stat: StatStrip; index: number }) {
               borderRadius: '50%',
             }}
           />
-          {/* Big number */}
           <span
             ref={numRef}
             className="font-display text-navy leading-none"
@@ -86,7 +75,6 @@ function Counter({ stat, index }: { stat: StatStrip; index: number }) {
           >
             0
           </span>
-          {/* Label */}
           <span className="font-mono text-xs tracking-[0.2em] uppercase text-navy/70 mt-1">
             {stat.label}
           </span>

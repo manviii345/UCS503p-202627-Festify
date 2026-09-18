@@ -7,15 +7,8 @@ interface HeroProps {
   onOpenUserSide: () => void;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   Animation stages
-   0 = mascot + typewriter only (intro)
-   1 = arches animate in
-   2 = nav + headline + CTA revealed (page revealed)
-───────────────────────────────────────────────────────────── */
 const PHRASES = ["Hey!", "Festify's live...", "Your stop for an amazing event"];
 
-// Consistent spring for bouncy feel
 const spring = (delay = 0) => ({
   type: 'spring' as const,
   stiffness: 260,
@@ -23,7 +16,6 @@ const spring = (delay = 0) => ({
   delay,
 });
 
-// Letter-level stagger config
 const letterVariants = {
   hidden: { opacity: 0, y: 60, scale: 0.5, rotate: -10 },
   visible: (i: number) => ({
@@ -33,18 +25,16 @@ const letterVariants = {
 };
 
 const LETTERS = ['F', 'E', 'S', 'T', 'I', 'F', 'Y'];
-// Alternate letter accent colors
 const LETTER_COLORS = ['#EC6484', '#F06E38', '#F4C430', '#D94E28', '#EC6484', '#F06E38', '#F4C430'];
 
 export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [stage, setStage] = useState(0);           // 0→1→2
+  const [stage, setStage] = useState(0);
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [typingDone, setTypingDone] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Skip all animation if user prefers reduced motion
   useEffect(() => {
     if (prefersReducedMotion) {
       setDisplayText(PHRASES[PHRASES.length - 1]);
@@ -53,27 +43,23 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
     }
   }, [prefersReducedMotion]);
 
-  // ── Typewriter effect ──
   useEffect(() => {
     if (prefersReducedMotion || typingDone) return;
 
     const currentPhrase = PHRASES[phraseIdx];
 
     if (displayText.length < currentPhrase.length) {
-      // Type next character
       intervalRef.current = setTimeout(() => {
         setDisplayText(currentPhrase.slice(0, displayText.length + 1));
-      }, phraseIdx === PHRASES.length - 1 ? 38 : 50); // faster on final phrase
+      }, phraseIdx === PHRASES.length - 1 ? 38 : 50);
     } else {
       if (phraseIdx < PHRASES.length - 1) {
-        // Pause, clear, move to next phrase; trigger arches at phrase 2
         intervalRef.current = setTimeout(() => {
-          if (phraseIdx === 1) setStage(1);      // arches start growing
+          if (phraseIdx === 1) setStage(1);
           setDisplayText('');
           setPhraseIdx(p => p + 1);
         }, phraseIdx === 0 ? 400 : 350);
       } else {
-        // Final phrase finished → reveal page
         intervalRef.current = setTimeout(() => {
           setTypingDone(true);
           setStage(2);
@@ -89,12 +75,9 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
 
   return (
     <div className="relative min-h-screen bg-[#F7F2E7] text-[#1A1A1A] flex flex-col overflow-hidden font-fredoka">
-
-      {/* ══ Rainbow Arch Graphics ══ */}
       <LeftRainbowArch isAnimatingIn={archesIn} />
       <RightRainbowArch isAnimatingIn={archesIn} />
 
-      {/* ══ NAV BAR ══ */}
       <motion.nav
         initial={{ y: -72, opacity: 0 }}
         animate={pageIn ? { y: 0, opacity: 1 } : { y: -72, opacity: 0 }}
@@ -129,13 +112,7 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
         </motion.button>
       </motion.nav>
 
-      {/* ══ MAIN HERO BODY ══ */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-12 pt-4 text-center">
-
-        {/* ── MASCOT + SPEECH BUBBLE ─────────────────────────
-            Starts centered (large), morphs to small caption
-            above the headline once the page reveals
-        ───────────────────────────────────────────────────── */}
         <motion.div
           layout
           transition={{ type: 'spring', stiffness: 220, damping: 22 }}
@@ -145,7 +122,6 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
               : 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
           }`}
         >
-          {/* Circular Badge Mascot */}
           <motion.div
             layout
             transition={{ type: 'spring', stiffness: 220, damping: 22 }}
@@ -155,12 +131,11 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
               height: pageIn ? '2.75rem' : '4rem',
             }}
             className="rounded-full bg-[#EC6484] border-[3px] border-dashed border-[#1A1A1A] flex items-center justify-center text-[#F4C430] shadow-[3px_3px_0px_#1A1A1A] shrink-0 select-none cursor-pointer transition-all"
-            onClick={() => setStage(2)}         // skip to end on click
+            onClick={() => setStage(2)}
           >
             <span className="font-groovy" style={{ fontSize: pageIn ? '1.1rem' : '1.6rem' }}>✉</span>
           </motion.div>
 
-          {/* Speech Bubble */}
           <motion.div
             layout
             transition={{ type: 'spring', stiffness: 220, damping: 22 }}
@@ -176,14 +151,12 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
             >
               {displayText}
             </span>
-            {/* Blinking cursor */}
             {!typingDone && (
               <span className="typewriter-cursor" />
             )}
           </motion.div>
         </motion.div>
 
-        {/* ── FESTIFY STAGGERED LETTERS ──────────────────── */}
         <AnimatePresence>
           {pageIn && (
             <motion.div
@@ -212,7 +185,6 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
           )}
         </AnimatePresence>
 
-        {/* ── SUBHEADING ───────────────────────────────── */}
         <AnimatePresence>
           {pageIn && (
             <motion.p
@@ -227,7 +199,6 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
           )}
         </AnimatePresence>
 
-        {/* ── CTA BUTTONS ──────────────────────────────── */}
         <AnimatePresence>
           {pageIn && (
             <motion.div
@@ -256,7 +227,6 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
           )}
         </AnimatePresence>
 
-        {/* Skip hint (only during intro stage 0) */}
         <AnimatePresence>
           {!pageIn && (
             <motion.button
@@ -273,7 +243,6 @@ export default function Hero({ onOpenAdmin, onOpenUserSide }: HeroProps) {
         </AnimatePresence>
       </main>
 
-      {/* ══ Bottom footer rule ══ */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={pageIn ? { opacity: 1 } : { opacity: 0 }}

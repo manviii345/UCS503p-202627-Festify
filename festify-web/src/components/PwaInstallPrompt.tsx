@@ -12,7 +12,6 @@ export default function PwaInstallPrompt() {
   const [installed, setInstalled] = useState(false);
 
   useEffect(() => {
-    // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setInstalled(true);
       return;

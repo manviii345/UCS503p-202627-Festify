@@ -26,7 +26,6 @@ export const STUDENT_FEATURES: StudentFeature[] = [
     tag: 'SEARCH ENGINE',
     title: 'Event Discovery',
     description: 'Browse hackathons, battle-of-bands, and celebrity keynotes across categories — even offline.',
-    // Magnifying glass icon path
     iconPath: 'M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z',
   },
   {
@@ -36,7 +35,6 @@ export const STUDENT_FEATURES: StudentFeature[] = [
     tag: 'GATE PASS',
     title: 'Registration & QR Pass',
     description: 'One-tap registration. Instant QR code generated on device — no queues, no paper.',
-    // QR code icon path
     iconPath: 'M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm14 3h1v1h-1v-1zm-3 0h1v1h-1v-1zm1-3h1v1h-1v-1zm3 0h1v1h-1v-1zm1 3h-1v3h3v-3h-2zm-5 0v3h1v-1h1v-2h-2z',
   },
   {
@@ -46,7 +44,6 @@ export const STUDENT_FEATURES: StudentFeature[] = [
     tag: 'CHRONOMETER',
     title: 'Live Schedule',
     description: 'Real-time timetable with push alerts for schedule changes, surprise acts, and winners.',
-    // Clock icon path
     iconPath: 'M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 5v5.5l3.5 2',
   },
   {
@@ -56,7 +53,6 @@ export const STUDENT_FEATURES: StudentFeature[] = [
     tag: 'CARTOGRAPHY',
     title: 'Interactive Venue Map',
     description: 'Navigate stages, food stalls, and first-aid posts across the campus with a live vector map.',
-    // Map pin icon path
     iconPath: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z',
   },
   {
@@ -66,7 +62,6 @@ export const STUDENT_FEATURES: StudentFeature[] = [
     tag: 'AIR TELEGRAPH',
     title: 'Notifications',
     description: 'Lock-screen push broadcasts for emergency updates, rain shifts, and stage changes — no SMS lag.',
-    // Bell icon path
     iconPath: 'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0',
   },
 ];

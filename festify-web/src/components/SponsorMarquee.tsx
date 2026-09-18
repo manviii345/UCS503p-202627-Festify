@@ -1,9 +1,3 @@
-/*
-  SponsorMarquee — infinitely auto-scrolling strip
-  Uses a CSS animation (no JS scroll events) for smooth, gap-free looping.
-  Content is duplicated so the second copy seamlessly continues the first.
-*/
-
 const ITEMS = [
   '✦ Sponsored by',
   'Thapar Institute',

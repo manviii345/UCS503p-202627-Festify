@@ -18,20 +18,22 @@ This document provides a strict, evidence-based technical audit of the **Festify
 ## 1. Module-by-Module Audit
 
 ### 1.1 Authentication & RBAC
-- **Status**: **PARTIALLY IMPLEMENTED**
+- **Status**: **FULLY IMPLEMENTED & TESTED**
 - **Files**:
-  - Backend: [server/routes/auth.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/auth.ts), [server/middleware/auth.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/middleware/auth.ts)
+  - Backend: [server/routes/auth.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/routes/auth.ts), [server/middleware/auth.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/middleware/auth.ts), [prisma/rehash.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/prisma/rehash.ts)
   - Frontend: [src/components/LoginModal.tsx](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/src/components/LoginModal.tsx)
+  - Tests: [server/auth.test.ts](file:///c:/Users/Manvi/OneDrive/Desktop/UCS503p-202627-Festify/festify-web/server/auth.test.ts)
 - **API Endpoints**:
   - `POST /api/auth/login` (Public)
+  - `POST /api/auth/register` (Public student self-registration)
 - **End-to-End Verification**:
-  - **Login Flow**: **Working**. `POST /api/auth/login` verifies credentials against the database and signs a JWT token containing `{ id, username, role }`.
+  - **Login Flow**: **Working**. `POST /api/auth/login` verifies credentials via `bcrypt.compare()` against stored bcrypt hashes.
+  - **User Registration**: **Working**. `POST /api/auth/register` validates username uniqueness (min 3 chars), password length (min 8 chars), blocks ADMIN self-registration, hashes password with `bcrypt.hash()`, and issues JWT token.
   - **JWT Verification**: **Working**. `authenticateJWT` extracts `Authorization: Bearer <token>` and verifies it using `JWT_SECRET`.
-  - **RBAC Enforcement**: **Working**. `requireAdmin` checks `req.user.role === 'ADMIN'` and returns `403 Forbidden` for non-admin users on protected admin endpoints.
-- **What is Broken / Missing**:
-  - ❌ **No User Signup API**: There is NO `POST /api/auth/register` or registration endpoint for new users. Users can only be created by seeding the database via `prisma/seed.ts`.
-  - ❌ **Plain Text Passwords**: Passwords are compared directly (`user.password !== password`) without `bcrypt` or Argon2 hashing.
-  - ⚠️ **Token Key Mismatch**: `LoginModal.tsx` stores both `festify_token` and `token` in `localStorage`. If `token` is missing or cleared, certain frontend components fallback to unauthenticated state.
+  - **RBAC Enforcement**: **Working**. `requireAdmin` checks `req.user.role === 'ADMIN'` and returns `403 Forbidden` for non-admin users.
+  - **Password Hashing**: **Enforced**. All passwords stored as `bcrypt` hashes (`$2a$` / `$2b$`). One-shot rehash migration script `prisma/rehash.ts` re-hashed legacy seeded users.
+  - **Token Storage**: **Canonicalized**. Unified on `festify_token` and `festify_role` across all frontend components.
+  - **Automated Tests**: 30/30 tests passing in `server/auth.test.ts`.
 
 ---
 

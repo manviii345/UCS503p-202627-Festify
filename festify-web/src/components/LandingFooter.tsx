@@ -32,15 +32,11 @@ const FOOTER_LINKS = ['About', 'Website Gallery', 'FAQs', 'Privacy', 'Help Desk'
 export default function LandingFooter({ onOpenAdmin, onOpenUserSide }: { onOpenAdmin: () => void; onOpenUserSide: () => void }) {
   return (
     <footer className="relative bg-[#1A1A1A] text-[#F7F2E7] overflow-hidden border-t-2 border-[#1A1A1A]">
-      {/* Rainbow stripes bleeding down from marquee */}
       <FooterStripes side="left" />
       <FooterStripes side="right" />
 
-      {/* Main content */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-10">
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-10">
-
-          {/* Left: Mascot badge + wordmark */}
           <div className="flex items-center gap-5">
             <motion.div
               whileHover={{ rotate: 20, scale: 1.1 }}
@@ -67,12 +63,10 @@ export default function LandingFooter({ onOpenAdmin, onOpenUserSide }: { onOpenA
             </div>
           </div>
 
-          {/* Center: Tagline */}
           <p className="max-w-xs text-[#F7F2E7]/60 text-sm font-fredoka leading-relaxed italic">
             "Where every moment becomes a postmark in time."
           </p>
 
-          {/* Right: CTA + links */}
           <div className="flex flex-col gap-4 items-start md:items-end">
             <div className="flex gap-3">
               <button
@@ -103,7 +97,6 @@ export default function LandingFooter({ onOpenAdmin, onOpenUserSide }: { onOpenA
           </div>
         </div>
 
-        {/* Bottom rule + legal fine print */}
         <div className="mt-12 pt-6 border-t border-[#F7F2E7]/10">
           <p className="text-[10px] text-[#F7F2E7]/25 tracking-wider text-center leading-relaxed uppercase">
             © 2026 Festify Postal Services · Reg. No. UCS-503P-2026 · All rights reserved ·

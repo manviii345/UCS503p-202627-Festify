@@ -7,8 +7,6 @@ const router = Router();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
 async function formatEventWithCapacity(event: any) {
   const registeredCount = await prisma.registration.count({
     where: { eventId: event.id, status: { not: 'CANCELLED' } }
@@ -21,9 +19,6 @@ async function formatEventWithCapacity(event: any) {
   };
 }
 
-// ─── Event Routes ────────────────────────────────────────────────────────────
-
-// GET all public events (with registered count and remaining seats)
 router.get('/events', async (req, res) => {
   try {
     const events = await prisma.event.findMany({
@@ -143,8 +138,6 @@ router.delete('/admin/events/:id', authenticateJWT, requireAdmin, async (req: Au
   }
 });
 
-// ─── Registration Routes ──────────────────────────────────────────────────────
-
 /**
  * POST /api/events/:eventId/register
  * Student event registration endpoint.
@@ -161,23 +154,19 @@ router.post('/events/:eventId/register', authenticateJWT, async (req: AuthReques
 
   try {
     const registration = await prisma.$transaction(async (tx) => {
-      // 1. Fetch event
       const event = await tx.event.findUnique({ where: { id: eventId } });
       if (!event) {
         throw { status: 404, message: 'Event not found' };
       }
 
-      // 2. Count active registrations for this event
       const activeCount = await tx.registration.count({
         where: { eventId, status: { not: 'CANCELLED' } }
       });
 
-      // 3. Capacity check
       if (activeCount >= event.maxParticipants) {
         throw { status: 400, message: 'Event is full' };
       }
 
-      // 4. Duplicate registration check
       const existing = await tx.registration.findUnique({
         where: { userId_eventId: { userId, eventId } }
       });
@@ -187,7 +176,6 @@ router.post('/events/:eventId/register', authenticateJWT, async (req: AuthReques
 
       const issuedAt = Date.now();
 
-      // 5. Create registration row with temporary token placeholder
       const tempToken = `temp_${userId}_${eventId}_${issuedAt}`;
       const reg = await tx.registration.create({
         data: {
@@ -198,13 +186,11 @@ router.post('/events/:eventId/register', authenticateJWT, async (req: AuthReques
         }
       });
 
-      // 6. Sign JWT token encoding { userId, eventId, registrationId, issuedAt }
       const signedQrToken = jwt.sign(
         { userId, eventId, registrationId: reg.id, issuedAt },
         JWT_SECRET
       );
 
-      // 7. Update row with signed QR token
       const finalReg = await tx.registration.update({
         where: { id: reg.id },
         data: { qrToken: signedQrToken },

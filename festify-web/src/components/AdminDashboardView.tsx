@@ -40,7 +40,6 @@ const INITIAL_REGISTRATIONS: RegistrationItem[] = [
 ];
 
 export default function AdminDashboardView({ onBackToLanding }: { onBackToLanding: () => void }) {
-  // Parse the admin's user ID from the stored JWT for tenant-scoped venue queries
   const adminFestId = (() => {
     try {
       const token = localStorage.getItem('festify_token');
@@ -81,7 +80,6 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
     fetchEvents();
   }, []);
 
-  // Trigger 3D scanner animation & increment checkin
   const handleTriggerScan = () => {
     setIsScanning(true);
     setTimeout(() => {
@@ -105,12 +103,8 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
 
   return (
     <div className="min-h-screen bg-[#F7F2E7] text-[#1A1A1A] flex flex-col md:flex-row font-fredoka antialiased">
-      {/* ──────────────────────────────────────────────────
-          DARK SIDEBAR (#1E1E1E) matching Screenshot 2 & 3
-      ────────────────────────────────────────────────── */}
       <aside className="w-full md:w-20 bg-[#1E1E1E] text-white flex md:flex-col items-center justify-between p-4 shrink-0 border-b md:border-b-0 md:border-r border-[#1A1A1A] z-20">
         <div className="flex md:flex-col items-center gap-6 w-full">
-          {/* Top Logo Badge 'F' */}
           <button
             onClick={onBackToLanding}
             title="Back to Festify Landing Page"
@@ -119,9 +113,7 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
             F
           </button>
 
-          {/* Navigation Icons */}
           <nav className="flex md:flex-col items-center gap-3">
-            {/* Dashboard Overview Icon */}
             <button
               onClick={() => setActiveSidebarTab('dashboard')}
               title="Dashboard Overview"
@@ -136,7 +128,6 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
               </svg>
             </button>
 
-            {/* Event Management Icon */}
             <button
               onClick={() => setActiveSidebarTab('events')}
               title="Event Management"
@@ -154,7 +145,6 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
               </svg>
             </button>
 
-            {/* Registrations Icon */}
             <button
               onClick={() => setActiveSidebarTab('registrations')}
               title="Registrations Table"
@@ -172,7 +162,6 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
               </svg>
             </button>
 
-            {/* 3D Gate Scanner Pass Icon */}
             <button
               onClick={() => setActiveSidebarTab('scanner')}
               title="3D Gate Scanner"
@@ -190,7 +179,6 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
               </svg>
             </button>
 
-            {/* Venue Map Icon */}
             <button
               onClick={() => setActiveSidebarTab('venue')}
               title="Venue Map"
@@ -209,17 +197,12 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
           </nav>
         </div>
 
-        {/* Bottom Avatar Badge 'AD' */}
         <div className="w-10 h-10 rounded-full bg-[#F06E38] text-white font-bold text-xs flex items-center justify-center shadow-md">
           AD
         </div>
       </aside>
 
-      {/* ──────────────────────────────────────────────────
-          MAIN ADMIN DASHBOARD CONTENT AREA
-      ────────────────────────────────────────────────── */}
       <main className="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full">
-        {/* Top Header Bar */}
         <header className="flex items-center justify-between mb-8 pb-4 border-b border-[#1A1A1A]/10">
           <div>
             <span className="text-xs font-mono tracking-widest text-[#1A1A1A]/60 uppercase">
@@ -241,7 +224,11 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
               AD
             </div>
             <button
-              onClick={onBackToLanding}
+              onClick={() => {
+                localStorage.removeItem('festify_token');
+                localStorage.removeItem('festify_role');
+                onBackToLanding();
+              }}
               className="hidden sm:inline-flex px-3 py-1.5 text-xs font-bold border border-[#1A1A1A] rounded-full hover:bg-[#1A1A1A] hover:text-white transition-colors"
             >
               Exit Dashboard ➔
@@ -249,12 +236,8 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
           </div>
         </header>
 
-        {/* ──────────────────────────────────────────────────
-            VIEW 1: DASHBOARD OVERVIEW (Screenshot 2)
-        ────────────────────────────────────────────────── */}
         {activeSidebarTab === 'dashboard' && (
           <div className="space-y-8">
-            {/* Live Fest Banner Card */}
             <div className="relative rounded-2xl overflow-hidden border-2 border-[#1A1A1A] shadow-[4px_4px_0px_#1A1A1A] bg-[#1E1E1E] text-white p-6 sm:p-10">
               {/* Background Concert Crowd Overlay */}
               <div
@@ -299,14 +282,6 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
               </div>
             </div>
 
-            {/* 
-              TODO: REAL-TIME PUSH SEAM (Socket.IO & Redis)
-              Currently, these metric cards render static overview numbers and local React state.
-              Future architecture integration point:
-                1. Socket.IO client hook: subscribe to 'fest:metrics:update' room for live attendee / registration counters.
-                2. Redis ephemeral crowd telemetry: buffer gate check-in pings in Redis hyperloglog / pubsub before flushing.
-            */}
-            {/* 3 Metric Cards Row matching Screenshot 2 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Metric 1 */}
               <div className="dashboard-card p-6 flex flex-col justify-between shadow-[3px_3px_0px_#1A1A1A]">

@@ -5,16 +5,10 @@ interface RainbowProps {
 }
 
 /*
-  FIX: The glitch was caused by each `motion.path` having its own independent
-  `scale` + `transformOrigin`. SVG paths don't consistently inherit CSS
-  transform-origin across browsers — each one was computing its pivot
-  differently, producing a stray sliver for the inner band.
-
-  Solution: ONE `motion.g` per arch cluster is the single animated element.
-  The group scales from the correct corner anchor. Individual bands inside only
-  have a tiny staggered `opacity` reveal (60ms apart) so they feel like they
-  "peel out" from outermost to innermost — but the scale/position is always
-  controlled by the parent group, which keeps them perfectly locked together.
+  Each arch is ONE motion.g scaled from its corner anchor. Individual bands only
+  stagger their opacity so they peel out from outermost to innermost, while position
+  and scale stay locked to the parent group — preventing browser-specific SVG
+  transform-origin glitches that occur when animating individual paths.
 */
 
 const GROUP_SPRING = {
@@ -42,38 +36,30 @@ export function LeftRainbowArch({ isAnimatingIn = true }: RainbowProps) {
         className="w-full h-full overflow-visible"
         style={{ display: 'block' }}
       >
-        {/*
-          The <g> has transform-origin at the bottom-left corner of the viewBox
-          so the whole cluster scales outward from that anchor.
-        */}
         <motion.g
           style={{ transformOrigin: '0px 480px' }}
           initial={{ scale: 0 }}
           animate={isAnimatingIn ? { scale: 1 } : { scale: 0 }}
           transition={{ ...GROUP_SPRING, delay: 0.05 }}
         >
-          {/* Pink outer band */}
           <motion.path
             d="M0 40 C 140 40, 220 140, 220 280 L 220 480 L 175 480 L 175 280 C 175 165, 120 85, 0 85 Z"
             fill="#EC6484" stroke="#1A1A1A" strokeWidth="8" strokeLinejoin="round"
             variants={bandVariants(0)}
             initial="hidden" animate={isAnimatingIn ? 'visible' : 'hidden'}
           />
-          {/* Mustard yellow band */}
           <motion.path
             d="M0 85 C 120 85, 175 165, 175 280 L 175 480 L 130 480 L 130 280 C 130 190, 90 130, 0 130 Z"
             fill="#F4C430" stroke="#1A1A1A" strokeWidth="8" strokeLinejoin="round"
             variants={bandVariants(0.06)}
             initial="hidden" animate={isAnimatingIn ? 'visible' : 'hidden'}
           />
-          {/* Orange band */}
           <motion.path
             d="M0 130 C 90 130, 130 190, 130 280 L 130 480 L 85 480 L 85 280 C 85 215, 60 175, 0 175 Z"
             fill="#F06E38" stroke="#1A1A1A" strokeWidth="8" strokeLinejoin="round"
             variants={bandVariants(0.12)}
             initial="hidden" animate={isAnimatingIn ? 'visible' : 'hidden'}
           />
-          {/* Deep red-orange inner band */}
           <motion.path
             d="M0 175 C 60 175, 85 215, 85 280 L 85 480 L 40 480 L 40 280 C 40 240, 30 220, 0 220 Z"
             fill="#D94E28" stroke="#1A1A1A" strokeWidth="8" strokeLinejoin="round"
@@ -100,37 +86,30 @@ export function RightRainbowArch({ isAnimatingIn = true }: RainbowProps) {
         className="w-full h-full overflow-visible"
         style={{ display: 'block' }}
       >
-        {/*
-          transform-origin at top-right corner (280, 0) in viewBox coordinates.
-        */}
         <motion.g
           style={{ transformOrigin: '280px 0px' }}
           initial={{ scale: 0 }}
           animate={isAnimatingIn ? { scale: 1 } : { scale: 0 }}
           transition={{ ...GROUP_SPRING, delay: 0.1 }}
         >
-          {/* Pink outer band */}
           <motion.path
             d="M280 440 C 140 440, 60 340, 60 200 L 60 0 L 105 0 L 105 200 C 105 315, 160 395, 280 395 Z"
             fill="#EC6484" stroke="#1A1A1A" strokeWidth="8" strokeLinejoin="round"
             variants={bandVariants(0)}
             initial="hidden" animate={isAnimatingIn ? 'visible' : 'hidden'}
           />
-          {/* Mustard yellow band */}
           <motion.path
             d="M280 395 C 160 395, 105 315, 105 200 L 105 0 L 150 0 L 150 200 C 150 290, 190 350, 280 350 Z"
             fill="#F4C430" stroke="#1A1A1A" strokeWidth="8" strokeLinejoin="round"
             variants={bandVariants(0.06)}
             initial="hidden" animate={isAnimatingIn ? 'visible' : 'hidden'}
           />
-          {/* Orange band */}
           <motion.path
             d="M280 350 C 190 350, 150 290, 150 200 L 150 0 L 195 0 L 195 200 C 195 265, 220 305, 280 305 Z"
             fill="#F06E38" stroke="#1A1A1A" strokeWidth="8" strokeLinejoin="round"
             variants={bandVariants(0.12)}
             initial="hidden" animate={isAnimatingIn ? 'visible' : 'hidden'}
           />
-          {/* Deep red-orange inner band */}
           <motion.path
             d="M280 305 C 220 305, 195 265, 195 200 L 195 0 L 240 0 L 240 200 C 240 240, 250 260, 280 260 Z"
             fill="#D94E28" stroke="#1A1A1A" strokeWidth="8" strokeLinejoin="round"

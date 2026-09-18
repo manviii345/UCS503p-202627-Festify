@@ -13,9 +13,9 @@ import express from 'express';
 import http from 'http';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import authRoutes from './routes/auth.js';
-import eventRoutes from './routes/events.js';
-import venueRoutes from './routes/venue.js';
+import authRoutes from '../routes/auth.js';
+import eventRoutes from '../routes/events.js';
+import venueRoutes from '../routes/venue.js';
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';

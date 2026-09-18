@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
@@ -47,7 +47,6 @@ router.post('/login', async (req, res) => {
 router.post('/register', async (req, res) => {
   const { username, password, role } = req.body;
 
-  // --- Validation ---
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required' });
   }
@@ -65,20 +64,17 @@ router.post('/register', async (req, res) => {
     return res.status(403).json({ error: 'Cannot self-register as ADMIN. Contact the organizer.' });
   }
 
-  // Default role is STUDENT; reject any other unrecognised roles
   const allowedRoles = ['STUDENT'];
   const assignedRole = (role && allowedRoles.includes(role.toUpperCase()))
     ? role.toUpperCase()
     : 'STUDENT';
 
   try {
-    // Check username uniqueness
     const existing = await prisma.user.findUnique({ where: { username: username.trim() } });
     if (existing) {
       return res.status(409).json({ error: 'Username already taken' });
     }
 
-    // Hash password before storing
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     const user = await prisma.user.create({

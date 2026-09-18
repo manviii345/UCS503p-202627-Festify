@@ -5,15 +5,6 @@ import { authenticateJWT, requireAdmin, AuthRequest } from '../middleware/auth.j
 const router = Router({ mergeParams: true });
 const prisma = new PrismaClient();
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-/**
- * PostGIS Spatial Query Processing Notes:
- *   - ST_AsGeoJSON(geometry): Converts spatial geometry column to GeoJSON object string.
- *   - ST_GeomFromGeoJSON(geojson): Constructs geometry object from GeoJSON.
- *   - ST_Contains(polygon, point): Native spatial containment query.
- * Ray-casting point-in-polygon algorithm below acts as secondary in-memory solver for local SVG canvas.
- */
 function pointInPolygon(px: number, py: number, polygon: number[][]): boolean {
   let inside = false;
   const n = polygon.length;
@@ -27,8 +18,6 @@ function pointInPolygon(px: number, py: number, polygon: number[][]): boolean {
   }
   return inside;
 }
-
-// ─── Routes ─────────────────────────────────────────────────────────────────
 
 const DEFAULT_VENUE_ZONES = [
   { name: 'North Gate (Main Entry)', type: 'zone', category: 'gate', color: '#EC6484', icon: '🚪', description: 'Main entry gate. Show your QR pass here. Open 8 AM – 11 PM.', coordinates: [[420, 10], [580, 10], [580, 70], [420, 70]] },
@@ -61,7 +50,6 @@ router.get('/:festId/venue', async (req, res) => {
       orderBy: { createdAt: 'asc' },
     });
 
-    // Auto-seed default campus zones on-the-fly if empty
     if (zones.length === 0) {
       for (const z of DEFAULT_VENUE_ZONES) {
         await prisma.venueZone.create({
@@ -83,7 +71,6 @@ router.get('/:festId/venue', async (req, res) => {
       });
     }
 
-    // Parse the JSON coordinate string back to arrays for the client
     const parsed = zones.map((z) => ({
       ...z,
       coordinates: typeof z.coordinates === 'string' ? JSON.parse(z.coordinates) : z.coordinates,
@@ -110,7 +97,6 @@ router.post('/:festId/venue/zones', authenticateJWT, requireAdmin, async (req: A
     return res.status(400).json({ error: 'Invalid festId' });
   }
 
-  // Tenant isolation check: you can only create zones under your own fest
   if (req.user!.id !== festId) {
     return res.status(403).json({
       error: 'Forbidden: you can only manage zones for your own fest',
@@ -171,7 +157,6 @@ router.post('/:festId/venue/locate', async (req, res) => {
       const coords = JSON.parse(z.coordinates);
 
       if (z.type === 'landmark') {
-        // coords is [lx, ly] — match within radius 30
         const [lx, ly] = coords as [number, number];
         const dist = Math.sqrt((x - lx) ** 2 + (y - ly) ** 2);
         if (dist <= 30) {
@@ -179,7 +164,6 @@ router.post('/:festId/venue/locate', async (req, res) => {
           break;
         }
       } else {
-        // coords is [[x1,y1],...] — ray-cast polygon test
         if (pointInPolygon(x, y, coords as number[][])) {
           matched = { ...z, coordinates: coords };
           break;

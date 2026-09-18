@@ -16,37 +16,31 @@ function RubberStampModel() {
   return (
     <Float speed={2} rotationIntensity={0.5} floatIntensity={0.6}>
       <group ref={groupRef} scale={1.1}>
-        {/* Wooden Handle Top Knob */}
         <mesh position={[0, 1.2, 0]} castShadow>
           <sphereGeometry args={[0.4, 32, 32]} />
           <meshStandardMaterial color="#8b4513" roughness={0.6} />
         </mesh>
 
-        {/* Turned Wooden Neck */}
         <mesh position={[0, 0.6, 0]} castShadow>
           <cylinderGeometry args={[0.2, 0.35, 0.8, 32]} />
           <meshStandardMaterial color="#a0522d" roughness={0.5} />
         </mesh>
 
-        {/* Brass Collar Ring */}
         <mesh position={[0, 0.15, 0]}>
           <cylinderGeometry args={[0.42, 0.42, 0.1, 32]} />
           <meshStandardMaterial color="#e8a63b" metalness={0.8} roughness={0.2} />
         </mesh>
 
-        {/* Stamp Base Block (Deep Ink Navy) */}
         <mesh position={[0, -0.1, 0]} castShadow>
           <cylinderGeometry args={[0.9, 0.9, 0.3, 32]} />
           <meshStandardMaterial color="#152b38" roughness={0.3} />
         </mesh>
 
-        {/* Rubber Cushion Layer (Crimson Red) */}
         <mesh position={[0, -0.3, 0]}>
           <cylinderGeometry args={[0.85, 0.85, 0.1, 32]} />
           <meshStandardMaterial color="#c23b32" roughness={0.4} />
         </mesh>
 
-        {/* Embossed Text Ring */}
         <mesh position={[0, -0.36, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.5, 0.75, 32]} />
           <meshStandardMaterial color="#efe3c8" roughness={0.2} />

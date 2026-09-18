@@ -33,13 +33,11 @@ function ScannerTerminal({ isScanning }: { isScanning: boolean }) {
 
   return (
     <group position={[0, -0.2, 0]}>
-      {/* Outer Terminal Housing Base (Navy & Brass) */}
       <mesh position={[0, -1.2, 0]} receiveShadow>
         <boxGeometry args={[3.2, 0.5, 2.2]} />
         <meshStandardMaterial color="#152b38" roughness={0.3} metalness={0.4} />
       </mesh>
 
-      {/* Terminal Brass Pillars */}
       <mesh position={[-1.3, -0.3, 0]}>
         <cylinderGeometry args={[0.08, 0.08, 1.4, 16]} />
         <meshStandardMaterial color="#e8a63b" roughness={0.2} metalness={0.7} />
@@ -49,7 +47,6 @@ function ScannerTerminal({ isScanning }: { isScanning: boolean }) {
         <meshStandardMaterial color="#e8a63b" roughness={0.2} metalness={0.7} />
       </mesh>
 
-      {/* Laser Scanner Beam Bar */}
       <mesh ref={laserRef} position={[0, 0, 0]}>
         <boxGeometry args={[2.8, 0.04, 0.8]} />
         <meshStandardMaterial
@@ -61,22 +58,18 @@ function ScannerTerminal({ isScanning }: { isScanning: boolean }) {
         />
       </mesh>
 
-      {/* Floating 3D QR Ticket Pass */}
       <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.4}>
         <group ref={ticketRef} position={[0, 0.2, 0]}>
-          {/* Ticket Card Face */}
           <mesh castShadow>
             <boxGeometry args={[1.8, 2.4, 0.08]} />
             <meshStandardMaterial color="#efe3c8" roughness={0.4} />
           </mesh>
 
-          {/* Ticket Header Crimson Bar */}
           <mesh position={[0, 0.9, 0.05]}>
             <planeGeometry args={[1.7, 0.45]} />
             <meshStandardMaterial color="#c23b32" roughness={0.3} />
           </mesh>
 
-          {/* QR Code Placeholder Box (Deep Ink Navy) */}
           <mesh position={[0, -0.2, 0.05]}>
             <planeGeometry args={[1.1, 1.1]} />
             <meshStandardMaterial color="#152b38" roughness={0.2} />
