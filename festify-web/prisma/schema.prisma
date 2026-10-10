@@ -28,9 +28,10 @@ model Fest {
   branding   String?
   ownerId    Int
   owner      User        @relation("FestOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  events     Event[]
-  venueZones VenueZone[]
-  createdAt  DateTime    @default(now())
+  events        Event[]
+  venueZones    VenueZone[]
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
 }
 
 model Event {
@@ -55,7 +56,10 @@ model Event {
   createdBy           User           @relation("EventCreator", fields: [createdById], references: [id])
   festId              Int?
   fest                Fest?          @relation(fields: [festId], references: [id], onDelete: Cascade)
+  zoneId              Int?
+  zone                VenueZone?     @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   registrations       Registration[]
+  notifications       Notification[]
 }
 
 // VenueZone: represents a polygon zone or point landmark on the campus venue map.
@@ -71,6 +75,7 @@ model VenueZone {
   icon        String?
   festId      Int
   fest        Fest     @relation(fields: [festId], references: [id], onDelete: Cascade)
+  events      Event[]
   createdAt   DateTime @default(now())
 }
 
@@ -87,3 +92,15 @@ model Registration {
 
   @@unique([userId, eventId])
 }
+
+model Notification {
+  id            Int      @id @default(autoincrement())
+  festId        Int
+  fest          Fest     @relation(fields: [festId], references: [id], onDelete: Cascade)
+  message       String
+  targetType    String   @default("fest") // "fest" | "event"
+  targetEventId Int?
+  targetEvent   Event?   @relation(fields: [targetEventId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+}
+

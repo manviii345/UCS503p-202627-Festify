@@ -4,6 +4,7 @@ import InteractivePassModal from './InteractivePassModal';
 import RubberStamp3D from '../three/RubberStamp3D';
 import EventDetailsModal from './EventDetailsModal';
 import VenueMap from './VenueMap';
+import AssistantPanel from './AssistantPanel';
 
 function QrPassCard({ reg }: { reg: any }) {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
@@ -46,6 +47,11 @@ function QrPassCard({ reg }: { reg: any }) {
           <p className="text-xs font-bold text-[#1A1A1A]/70 mt-1">
             📅 {reg.event?.date} · 🕐 {reg.event?.startTime} · 📍 {reg.event?.venue}
           </p>
+          {reg.event?.zone && (
+            <span className="inline-block mt-2 px-2 py-0.5 text-[10px] font-bold text-white rounded" style={{ backgroundColor: reg.event.zone.color || '#F06E38' }}>
+              📍 Zone: {reg.event.zone.name}
+            </span>
+          )}
         </div>
 
         <div className="mt-4 pt-3 border-t border-[#1A1A1A]/10 flex items-center justify-between text-[10px] font-bold text-[#1A1A1A]/50">
@@ -61,19 +67,32 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
   const [show3DPass, setShow3DPass] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [showVenueMap, setShowVenueMap] = useState(false);
-  const [activeTab, setActiveTab] = useState<'events' | 'passes'>('events');
+  const [activeTab, setActiveTab] = useState<'events' | 'schedule' | 'passes' | 'assistant'>('events');
 
   const STUDENT_FEST_ID = 1;
 
   const fetchEvents = () => {
     fetch('/api/events')
       .then(res => res.json())
-      .then(data => setEvents(data))
-      .catch(console.error);
+      .then(data => {
+        if (Array.isArray(data)) {
+          setEvents(data);
+          try {
+            localStorage.setItem('festify_cached_events', JSON.stringify(data));
+          } catch {}
+        }
+      })
+      .catch(() => {
+        const cached = localStorage.getItem('festify_cached_events');
+        if (cached) {
+          try { setEvents(JSON.parse(cached)); } catch {}
+        }
+      });
   };
 
   const fetchMyRegistrations = () => {
@@ -84,19 +103,55 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.ok ? res.json() : [])
-      .then(data => setRegistrations(data))
+      .then(data => {
+        if (Array.isArray(data)) {
+          setRegistrations(data);
+          try {
+            localStorage.setItem('festify_cached_passes', JSON.stringify(data));
+          } catch {}
+        }
+      })
+      .catch(() => {
+        const cached = localStorage.getItem('festify_cached_passes');
+        if (cached) {
+          try { setRegistrations(JSON.parse(cached)); } catch {}
+        }
+      });
+  };
+
+  const fetchNotifications = () => {
+    const token = localStorage.getItem('festify_token');
+    if (!token) return;
+
+    fetch('/api/notifications', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (Array.isArray(data)) {
+          setNotifications(data);
+        }
+      })
       .catch(console.error);
   };
 
   useEffect(() => {
     fetchEvents();
     fetchMyRegistrations();
+    fetchNotifications();
   }, []);
 
   const filteredEvents = events.filter(ev => {
     const matchesSearch = ev.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCat = categoryFilter === 'All' || ev.category === categoryFilter;
     return matchesSearch && matchesCat;
+  });
+
+  // Time-sorted Schedule List
+  const scheduleEvents = [...events].sort((a, b) => {
+    const timeA = `${a.date} ${a.startTime}`;
+    const timeB = `${b.date} ${b.startTime}`;
+    return timeA.localeCompare(timeB);
   });
 
   return (
@@ -132,10 +187,30 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mb-8">
+        {/* Real Live Broadcast Alerts Banner */}
+        {notifications.length > 0 && (
+          <div className="mb-8 p-4 bg-[#EC6484] text-[#1A1A1A] border-2 border-[#1A1A1A] rounded-2xl shadow-[4px_4px_0px_#1A1A1A]">
+            <h4 className="text-xs font-black uppercase tracking-wider mb-2 flex items-center gap-2">
+              <span>🔔</span> Live Broadcast Announcements
+            </h4>
+            <div className="space-y-2">
+              {notifications.map((n) => (
+                <div key={n.id} className="bg-[#F7F2E7] p-3 rounded-xl border border-[#1A1A1A] text-xs font-semibold flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-[#F06E38] mr-2">[{n.targetType === 'event' ? `Targeted: ${n.targetEvent?.name}` : 'Fest-Wide'}]</span>
+                    <span>{n.message}</span>
+                  </div>
+                  <span className="text-[10px] text-gray-500">{new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-3 mb-8">
           <button
             onClick={() => setActiveTab('events')}
-            className={`px-6 py-3 font-black text-sm rounded-2xl border-2 border-[#1A1A1A] transition-all ${
+            className={`px-5 py-3 font-black text-xs sm:text-sm rounded-2xl border-2 border-[#1A1A1A] transition-all ${
               activeTab === 'events'
                 ? 'bg-[#1E1E1E] text-white shadow-[4px_4px_0px_#EC6484]'
                 : 'bg-[#EFE8D8] text-[#1A1A1A] hover:bg-[#F4C430]'
@@ -144,21 +219,41 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
             🎉 All Fest Events ({events.length})
           </button>
           <button
+            onClick={() => setActiveTab('schedule')}
+            className={`px-5 py-3 font-black text-xs sm:text-sm rounded-2xl border-2 border-[#1A1A1A] transition-all ${
+              activeTab === 'schedule'
+                ? 'bg-[#1E1E1E] text-white shadow-[4px_4px_0px_#EC6484]'
+                : 'bg-[#EFE8D8] text-[#1A1A1A] hover:bg-[#F4C430]'
+            }`}
+          >
+            📅 Live Schedule
+          </button>
+          <button
             onClick={() => {
               setActiveTab('passes');
               fetchMyRegistrations();
             }}
-            className={`px-6 py-3 font-black text-sm rounded-2xl border-2 border-[#1A1A1A] transition-all ${
+            className={`px-5 py-3 font-black text-xs sm:text-sm rounded-2xl border-2 border-[#1A1A1A] transition-all ${
               activeTab === 'passes'
                 ? 'bg-[#1E1E1E] text-white shadow-[4px_4px_0px_#EC6484]'
                 : 'bg-[#EFE8D8] text-[#1A1A1A] hover:bg-[#F4C430]'
             }`}
           >
-            🎟 My Passes & QR Codes ({registrations.length})
+            🎟 My Passes ({registrations.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('assistant')}
+            className={`px-5 py-3 font-black text-xs sm:text-sm rounded-2xl border-2 border-[#1A1A1A] transition-all ${
+              activeTab === 'assistant'
+                ? 'bg-[#1E1E1E] text-white shadow-[4px_4px_0px_#EC6484]'
+                : 'bg-[#EFE8D8] text-[#1A1A1A] hover:bg-[#F4C430]'
+            }`}
+          >
+            🤖 AI Assistant
           </button>
         </div>
 
-        {activeTab === 'events' ? (
+        {activeTab === 'events' && (
           <>
             <div className="mb-12 flex flex-col md:flex-row items-center justify-between bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-3xl p-6 sm:p-8 shadow-[4px_4px_0px_#1A1A1A]">
               <div>
@@ -245,6 +340,13 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
                       <div className="flex items-center gap-2"><span>📅</span> {event.date}</div>
                       <div className="flex items-center gap-2"><span>🕐</span> {event.startTime}</div>
                       <div className="flex items-center gap-2"><span>📍</span> {event.venue}</div>
+                      {event.zone && (
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded text-[10px] text-white font-bold" style={{ backgroundColor: event.zone.color || '#F06E38' }}>
+                            Where is this? Zone: {event.zone.name}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="mt-6 pt-4 border-t-2 border-[#1A1A1A]/10 flex items-center justify-between">
@@ -260,7 +362,67 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
               ))}
             </div>
           </>
-        ) : (
+        )}
+
+        {/* LIVE SCHEDULE VIEW */}
+        {activeTab === 'schedule' && (
+          <div className="space-y-6 mb-16">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs font-mono text-[#F06E38] font-bold uppercase tracking-wider">Chronological Timetable</span>
+                <h2 className="text-2xl font-black text-[#1A1A1A]">Fest Live Schedule</h2>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {scheduleEvents.map((ev) => (
+                <div key={ev.id} className="bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-2xl p-5 shadow-[4px_4px_0px_#1A1A1A] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-[#1E1E1E] text-[#F4C430] p-3 rounded-xl border border-[#1A1A1A] text-center shrink-0 min-w-[90px]">
+                      <div className="text-xs font-black uppercase tracking-wider">{ev.startTime}</div>
+                      <div className="text-[10px] text-gray-400 font-bold mt-0.5">{ev.date}</div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-black text-[#1A1A1A] uppercase tracking-tight">{ev.name}</h3>
+                      <p className="text-xs text-[#1A1A1A]/70 font-semibold mt-1">
+                        📍 Venue: <span className="text-[#1A1A1A]">{ev.venue}</span>
+                        {ev.zone && (
+                          <span className="ml-2 font-bold text-[#F06E38]">({ev.zone.name})</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+                    <span className="px-3 py-1 bg-[#F4C430] text-[#1A1A1A] text-[10px] font-bold rounded-full border border-[#1A1A1A] uppercase tracking-widest">
+                      {ev.category}
+                    </span>
+
+                    <button
+                      onClick={() => {
+                        setShowVenueMap(true);
+                        document.getElementById('student-venue-map-toggle')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="px-3 py-1.5 bg-white border border-[#1A1A1A] text-xs font-bold rounded-xl hover:bg-[#F06E38] hover:text-white transition-colors"
+                    >
+                      📍 Where is this?
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedEvent(ev)}
+                      className="px-4 py-2 bg-[#EC6484] text-[#1A1A1A] text-xs font-bold rounded-xl border border-[#1A1A1A] shadow-[2px_2px_0px_#1A1A1A] hover:bg-[#F4C430]"
+                    >
+                      Details ➔
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'passes' && (
           <div className="mb-16">
             {registrations.length === 0 ? (
               <div className="bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-2xl p-12 text-center shadow-[4px_4px_0px_#1A1A1A]">
@@ -286,6 +448,12 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
           </div>
         )}
 
+        {activeTab === 'assistant' && (
+          <div className="max-w-3xl mx-auto mb-16">
+            <AssistantPanel role="STUDENT" />
+          </div>
+        )}
+
         <div className="mb-16">
           <div
             className="flex items-center justify-between mb-4 cursor-pointer"
@@ -299,7 +467,7 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
               <span className="text-xs font-mono text-[#F06E38] font-bold uppercase tracking-wider">
                 Campus Navigation
               </span>
-              <h2 className="text-2xl font-black text-[#1A1A1A]">Interactive Venue Map</h2>
+              <h2 className="text-2xl font-black text-[#1A1A1A]">Interactive Venue Map & Zones</h2>
             </div>
             <button className="px-4 py-2 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-bold shadow-[2px_2px_0px_#1A1A1A] hover:bg-[#F4C430] transition-colors">
               {showVenueMap ? '▲ Hide Map' : '🗺️ Show Map'}
@@ -344,4 +512,3 @@ export default function StudentUserView({ onBackToLanding, onOpenAdmin }: { onBa
     </div>
   );
 }
-

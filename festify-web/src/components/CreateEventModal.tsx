@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+
+interface ZoneOption {
+  id: number;
+  name: string;
+  category: string;
+  color: string;
+}
 
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialData?: any; // For editing if needed
 }
 
 export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateEventModalProps) {
@@ -17,13 +25,28 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
     startTime: '',
     endTime: '',
     venue: '',
+    zoneId: '',
     maxParticipants: '',
     registrationDeadline: '',
     rules: '',
     prizes: '',
     contact: ''
   });
+  const [zones, setZones] = useState<ZoneOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      const token = localStorage.getItem('festify_token');
+      fetch('/api/fests/1/venue', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      })
+        .then(r => r.ok ? r.json() : [])
+        .then(data => setZones(Array.isArray(data) ? data : []))
+        .catch(err => console.error('Failed to load venue zones', err));
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,26 +54,74 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
     const token = localStorage.getItem('festify_token');
 
     try {
+      const payload = {
+        ...formData,
+        zoneId: formData.zoneId ? Number(formData.zoneId) : null
+      };
+
       const res = await fetch('/api/admin/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       if (res.ok) {
         onSuccess();
         onClose();
       } else {
-        alert('Failed to create event');
+        const errData = await res.json();
+        alert(errData.error || 'Failed to create event');
       }
     } catch (error) {
       console.error(error);
       alert('Error creating event');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateAiDescription = async () => {
+    if (!formData.name) {
+      alert('Please enter an Event Name first to generate a description!');
+      return;
+    }
+    setAiLoading(true);
+    const token = localStorage.getItem('festify_token');
+
+    try {
+      const res = await fetch('/api/assistant/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          message: `Draft an exciting, professional event description for a college fest event titled "${formData.name}" in category "${formData.category}". Keep it under 3 sentences.`
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) {
+          setFormData(prev => ({ ...prev, description: data.reply }));
+        }
+      } else {
+        // Fallback draft if assistant endpoint is not ready
+        setFormData(prev => ({
+          ...prev,
+          description: `Get ready for ${formData.name}! Join top participants in this thrilling ${formData.category} competition with exciting prizes and live crowds.`
+        }));
+      }
+    } catch (err) {
+      setFormData(prev => ({
+        ...prev,
+        description: `Join us for ${formData.name}, an epic ${formData.category} event packed with energy, innovation, and intense competition!`
+      }));
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -98,7 +169,17 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Description *</label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70">Description *</label>
+              <button
+                type="button"
+                onClick={handleGenerateAiDescription}
+                disabled={aiLoading}
+                className="text-[10px] font-bold px-2 py-0.5 bg-[#4A7C59] text-white rounded-lg border border-[#1A1A1A] hover:bg-[#3B6447] transition-colors flex items-center gap-1"
+              >
+                ✨ {aiLoading ? 'Generating...' : 'Generate with AI'}
+              </button>
+            </div>
             <textarea required name="description" value={formData.description} onChange={handleChange} rows={2} className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]" placeholder="Detailed description of the event..."></textarea>
           </div>
 
@@ -124,33 +205,44 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Venue *</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Venue Name *</label>
               <input required name="venue" value={formData.venue} onChange={handleChange} type="text" placeholder="Main Auditorium" className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Map Zone Link</label>
+              <select name="zoneId" value={formData.zoneId} onChange={handleChange} className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]">
+                <option value="">-- Select Campus Zone --</option>
+                {zones.map(z => (
+                  <option key={z.id} value={z.id}>{z.name} ({z.category})</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Max Participants *</label>
               <input required name="maxParticipants" value={formData.maxParticipants} onChange={handleChange} type="number" min="1" className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]" />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Reg. Deadline *</label>
               <input required name="registrationDeadline" value={formData.registrationDeadline} onChange={handleChange} type="date" className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Prizes</label>
+              <input name="prizes" value={formData.prizes} onChange={handleChange} type="text" placeholder="1st: $500, 2nd: $200" className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Prizes</label>
-              <input name="prizes" value={formData.prizes} onChange={handleChange} type="text" placeholder="1st: $500, 2nd: $200" className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]" />
-            </div>
-            <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Contact Info</label>
               <input name="contact" value={formData.contact} onChange={handleChange} type="text" placeholder="John: +1234567890" className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]" />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Rules</label>
-            <textarea name="rules" value={formData.rules} onChange={handleChange} rows={2} className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]" placeholder="1. Must be a student..."></textarea>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Rules</label>
+              <input name="rules" value={formData.rules} onChange={handleChange} type="text" className="w-full p-2.5 bg-[#EFE8D8] border-2 border-[#1A1A1A] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#F06E38]" placeholder="1. Must be a student..." />
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

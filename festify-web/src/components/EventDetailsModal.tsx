@@ -104,9 +104,14 @@ export default function EventDetailsModal({ event, isOpen, onClose, onRegistered
                   {event.name}
                 </h2>
                 <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-[#1A1A1A]/70 uppercase tracking-widest">
-                  <span>{event.date}</span>
-                  <span>{event.startTime}</span>
-                  <span>{event.venue}</span>
+                  <span>📅 {event.date}</span>
+                  <span>🕐 {event.startTime}</span>
+                  <span>📍 {event.venue}</span>
+                  {event.zone && (
+                    <span className="px-2 py-0.5 rounded text-[10px] text-white font-bold" style={{ backgroundColor: event.zone.color || '#F06E38' }}>
+                      📍 Zone: {event.zone.name}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

@@ -3,13 +3,15 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 
+import { authLimiter } from '../middleware/rateLimit.js';
+
 const router = Router();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 const SALT_ROUNDS = 12;
 
 // ─── POST /api/auth/login ────────────────────────────────────────────────────
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -44,7 +46,7 @@ router.post('/login', async (req, res) => {
 // ─── POST /api/auth/register ─────────────────────────────────────────────────
 // Students can self-register. ADMIN role creation is intentionally blocked here;
 // admin accounts are provisioned only via the seed script.
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   const { username, password, role } = req.body;
 
   if (!username || !password) {
