@@ -31,3 +31,13 @@ export const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+export const assistantLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 40,
+  message: { error: 'Too many assistant requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+

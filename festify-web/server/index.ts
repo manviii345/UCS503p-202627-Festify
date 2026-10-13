@@ -6,6 +6,8 @@ import authRoutes from './routes/auth.js';
 import eventRoutes from './routes/events.js';
 import venueRoutes from './routes/venue.js';
 import notificationRoutes from './routes/notifications.js';
+import assistantRoutes from './routes/assistant.js';
+import densityRoutes from './routes/density.js';
 import { apiLimiter } from './middleware/rateLimit.js';
 import { initSocketServer } from './socket.js';
 
@@ -26,6 +28,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api', eventRoutes);
 app.use('/api', notificationRoutes);
 app.use('/api/fests', venueRoutes);
+app.use('/api/assistant', assistantRoutes);
+app.use('/api', densityRoutes);
+
 
 server.listen(PORT, () => {
   console.log(`🚀 Festify Real-Time API Server running on http://localhost:${PORT}`);

@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { authenticateJWT, requireAdmin, AuthRequest } from '../middleware/auth.js';
 import { registrationLimiter, checkinLimiter } from '../middleware/rateLimit.js';
 import { broadcastCheckIn, broadcastScheduleUpdate } from '../socket.js';
+import { recordGateLog } from './density.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -407,6 +408,14 @@ async function processCheckIn(registrationId: number, tokenToVerify: string | un
       registrationId: reg.id,
       username: reg.user.username,
       checkedInAt: updated.checkedInAt
+    });
+
+    // Phase 4: record gate telemetry (non-fatal — runs after response dispatch)
+    recordGateLog({
+      registrationId: reg.id,
+      festId: reg.event.createdById,
+      eventId: reg.eventId,
+      zoneId: reg.event.zoneId ?? null,
     });
   }
 

@@ -15,9 +15,13 @@
     "test:registration": "npx tsx server/tests/registration.test.ts",
     "test:events": "npx tsx server/tests/events.test.ts",
     "rehash": "npx tsx prisma/rehash.ts",
-    "bench:ttc": "npx tsx scripts/bench-ttc.ts"
+    "bench:ttc": "npx tsx scripts/bench-ttc.ts",
+    "test:phase3": "npx tsx server/tests/phase3.test.ts",
+    "test:phase4": "npx tsx server/tests/phase4.test.ts",
+    "eval:assistant": "npx tsx server/assistant.eval.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
     "@prisma/client": "^5.22.0",
     "@react-three/drei": "^9.121.5",
     "@react-three/fiber": "^8.17.10",

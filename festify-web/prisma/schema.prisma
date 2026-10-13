@@ -21,62 +21,65 @@ model User {
 }
 
 model Fest {
-  id         Int         @id @default(autoincrement())
-  name       String
-  startDate  String?
-  endDate    String?
-  branding   String?
-  ownerId    Int
-  owner      User        @relation("FestOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  events        Event[]
-  venueZones    VenueZone[]
-  notifications Notification[]
-  createdAt     DateTime       @default(now())
+  id              Int             @id @default(autoincrement())
+  name            String
+  startDate       String?
+  endDate         String?
+  branding        String?
+  ownerId         Int
+  owner           User            @relation("FestOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  events          Event[]
+  venueZones      VenueZone[]
+  notifications   Notification[]
+  createdAt       DateTime        @default(now())
 }
 
 model Event {
-  id                  Int            @id @default(autoincrement())
-  name                String
-  description         String
-  image               String?
-  category            String
-  date                String
-  startTime           String
-  endTime             String
-  venue               String
-  maxParticipants     Int
+  id                   Int            @id @default(autoincrement())
+  name                 String
+  description          String
+  image                String?
+  category             String
+  date                 String
+  startTime            String
+  endTime              String
+  venue                String
+  maxParticipants      Int
   registrationDeadline String
-  rules               String?
-  prizes              String?
-  contact             String?
-  status              String         @default("Upcoming")
-  createdAt           DateTime       @default(now())
+  rules                String?
+  prizes               String?
+  contact              String?
+  status               String         @default("Upcoming")
+  createdAt            DateTime       @default(now())
 
-  createdById         Int
-  createdBy           User           @relation("EventCreator", fields: [createdById], references: [id])
-  festId              Int?
-  fest                Fest?          @relation(fields: [festId], references: [id], onDelete: Cascade)
-  zoneId              Int?
-  zone                VenueZone?     @relation(fields: [zoneId], references: [id], onDelete: SetNull)
-  registrations       Registration[]
-  notifications       Notification[]
+  createdById          Int
+  createdBy            User           @relation("EventCreator", fields: [createdById], references: [id])
+  festId               Int?
+  fest                 Fest?          @relation(fields: [festId], references: [id], onDelete: Cascade)
+  zoneId               Int?
+  zone                 VenueZone?     @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  registrations        Registration[]
+  notifications        Notification[]
+  gateLogs             GateLog[]      @relation("GateLogEvent")
 }
 
 // VenueZone: represents a polygon zone or point landmark on the campus venue map.
 // 'coordinates' stores GeoJSON geometry format (rendered via PostGIS ST_AsGeoJSON / ST_Contains).
 model VenueZone {
-  id          Int      @id @default(autoincrement())
-  name        String
-  type        String   @default("zone")       // "zone" | "landmark"
-  category    String   @default("other")      // "stage" | "food" | "gate" | "restroom" | "parking" | etc.
-  coordinates String                          // GeoJSON coordinate array string
-  color       String   @default("#F4C430")
-  description String?
-  icon        String?
-  festId      Int
-  fest        Fest     @relation(fields: [festId], references: [id], onDelete: Cascade)
-  events      Event[]
-  createdAt   DateTime @default(now())
+  id              Int             @id @default(autoincrement())
+  name            String
+  type            String          @default("zone")       // "zone" | "landmark"
+  category        String          @default("other")      // "stage" | "food" | "gate" | "restroom" | "parking" | etc.
+  coordinates     String                                  // GeoJSON coordinate array string
+  color           String          @default("#F4C430")
+  description     String?
+  icon            String?
+  festId          Int
+  fest            Fest            @relation(fields: [festId], references: [id], onDelete: Cascade)
+  events          Event[]
+  gateLogs        GateLog[]       @relation("GateLogZone")
+  crowdSnapshots  CrowdSnapshot[] @relation("CrowdSnapshotZone")
+  createdAt       DateTime        @default(now())
 }
 
 model Registration {
@@ -89,8 +92,33 @@ model Registration {
   status      String    @default("REGISTERED") // "REGISTERED" | "CHECKED_IN" | "CANCELLED"
   checkedInAt DateTime?
   createdAt   DateTime  @default(now())
+  gateLogs    GateLog[]
 
   @@unique([userId, eventId])
+}
+
+// GateLog: One record per successful gate check-in scan.
+// Enables real-time crowd density aggregation per zone.
+model GateLog {
+  id             Int          @id @default(autoincrement())
+  registrationId Int
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  zoneId         Int?
+  zone           VenueZone?   @relation("GateLogZone", fields: [zoneId], references: [id], onDelete: SetNull)
+  adminId        Int          // createdById of the owning admin (tenantId)
+  eventId        Int
+  event          Event        @relation("GateLogEvent", fields: [eventId], references: [id], onDelete: Cascade)
+  scannedAt      DateTime     @default(now())
+}
+
+// CrowdSnapshot: Periodic density reading per zone for trending/history.
+model CrowdSnapshot {
+  id      Int        @id @default(autoincrement())
+  adminId Int        // tenantId (event.createdById)
+  zoneId  Int?
+  zone    VenueZone? @relation("CrowdSnapshotZone", fields: [zoneId], references: [id], onDelete: SetNull)
+  count   Int
+  takenAt DateTime   @default(now())
 }
 
 model Notification {
@@ -103,4 +131,3 @@ model Notification {
   targetEvent   Event?   @relation(fields: [targetEventId], references: [id], onDelete: SetNull)
   createdAt     DateTime @default(now())
 }
-

@@ -71,6 +71,7 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
   const [notifTargetType, setNotifTargetType] = useState<'fest' | 'event'>('fest');
   const [notifTargetEventId, setNotifTargetEventId] = useState<string>('');
   const [notifSending, setNotifSending] = useState(false);
+  const [aiDrafting, setAiDrafting] = useState(false);
 
   const [showCreateEventModal, setShowCreateEventModal] = useState(false);
   const [stats, setStats] = useState<AdminStats>({
@@ -178,6 +179,36 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
       setNotifSending(false);
     }
   };
+
+  const handleAiDraftNotification = async () => {
+    setAiDrafting(true);
+    const token = localStorage.getItem('festify_token');
+    try {
+      const res = await fetch('/api/assistant/draft-announcement', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          eventId: notifTargetEventId ? Number(notifTargetEventId) : undefined,
+          update_type: notifTargetType === 'event' ? 'event_update' : 'reminder',
+          key_details: notifMessage || 'Festival activities starting in 15 minutes at central quad'
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.announcement) {
+          setNotifMessage(data.announcement);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to draft announcement with AI', err);
+    } finally {
+      setAiDrafting(false);
+    }
+  };
+
 
   const filteredRegistrations = stats.recentRegistrations.filter(reg => {
     const matchesSearch = reg.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -641,7 +672,17 @@ export default function AdminDashboardView({ onBackToLanding }: { onBackToLandin
                 )}
 
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70 mb-1">Alert Message *</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/70">Alert Message *</label>
+                    <button
+                      type="button"
+                      onClick={handleAiDraftNotification}
+                      disabled={aiDrafting}
+                      className="text-[10px] font-bold px-2 py-0.5 bg-[#4A7C59] text-white rounded-lg border border-[#1A1A1A] hover:bg-[#3B6447] transition-colors flex items-center gap-1 shadow-sm"
+                    >
+                      ✨ {aiDrafting ? 'Drafting...' : 'Draft with AI'}
+                    </button>
+                  </div>
                   <textarea
                     required
                     rows={3}

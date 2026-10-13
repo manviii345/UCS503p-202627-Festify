@@ -9,7 +9,6 @@ interface CameraQrScannerProps {
 export default function CameraQrScanner({ onScanSuccess, onScanError }: CameraQrScannerProps) {
   const [manualToken, setManualToken] = useState('');
   const [cameraActive, setCameraActive] = useState(false);
-  const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const elementId = 'html5qr-code-full-region';
@@ -19,24 +18,21 @@ export default function CameraQrScanner({ onScanSuccess, onScanError }: CameraQr
       if (!scannerRef.current) {
         scannerRef.current = new Html5Qrcode(elementId);
       }
-      setScanStatus('scanning');
       setCameraActive(true);
       await scannerRef.current.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
-          setScanStatus('success');
           stopCamera();
           onScanSuccess(decodedText);
         },
-        (err) => {
+        () => {
           // ignore transient frame scanning errors
         }
       );
     } catch (err: any) {
       console.warn('Camera failed to start, fallback to manual input mode', err);
       setCameraActive(false);
-      setScanStatus('error');
       setErrorMessage(err?.message || 'Could not access camera device. Please paste QR token manually.');
       if (onScanError) onScanError(err?.message || 'Camera access error');
     }

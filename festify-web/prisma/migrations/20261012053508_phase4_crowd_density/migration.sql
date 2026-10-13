@@ -1,0 +1,24 @@
+-- CreateTable
+CREATE TABLE "GateLog" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "registrationId" INTEGER NOT NULL,
+    "zoneId" INTEGER,
+    "festId" INTEGER NOT NULL,
+    "eventId" INTEGER NOT NULL,
+    "scannedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "GateLog_registrationId_fkey" FOREIGN KEY ("registrationId") REFERENCES "Registration" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "GateLog_zoneId_fkey" FOREIGN KEY ("zoneId") REFERENCES "VenueZone" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "GateLog_festId_fkey" FOREIGN KEY ("festId") REFERENCES "Fest" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "GateLog_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "CrowdSnapshot" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "festId" INTEGER NOT NULL,
+    "zoneId" INTEGER,
+    "count" INTEGER NOT NULL,
+    "takenAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "CrowdSnapshot_festId_fkey" FOREIGN KEY ("festId") REFERENCES "Fest" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "CrowdSnapshot_zoneId_fkey" FOREIGN KEY ("zoneId") REFERENCES "VenueZone" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);

@@ -109,3 +109,10 @@ export function broadcastScheduleUpdate(festId: number, data: any) {
     io.to(`fest_${festId}`).emit('schedule_update', data);
   }
 }
+
+export function broadcastDensityUpdate(festId: number, data: any) {
+  if (io) {
+    io.to(`fest_${festId}`).emit('density_update', data);
+  }
+}
+
